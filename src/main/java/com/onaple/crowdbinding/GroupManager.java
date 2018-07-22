@@ -97,13 +97,13 @@ public class GroupManager {
         registerInvitation(pendingInvitation);
         Text acceptClickableText = Text.builder("[Accept]")
                 .color(TextColors.GREEN)
-                .onClick(TextActions.runCommand("group accept " + pendingInvitation.getUuid().toString()))
+                .onClick(TextActions.runCommand("/group accept " + pendingInvitation.getUuid().toString()))
                 .onHover(TextActions.showText(Text.of("Accept this invitation")))
                 .build();
 
         Text denyClickableText = Text.builder("[Deny]")
                 .color(TextColors.RED)
-                .onClick(TextActions.runCommand("group deny " + pendingInvitation.getUuid().toString()))
+                .onClick(TextActions.runCommand("/group deny " + pendingInvitation.getUuid().toString()))
                 .onHover(TextActions.showText(Text.of("Deny this invitation")))
                 .build();
 
@@ -113,6 +113,9 @@ public class GroupManager {
                 .append(Text.of(" "))
                 .append(denyClickableText)
                 .build();
+
+        invited.sendMessage(invitationText);
+        inviter.sendMessage(Text.builder("You invited ").append(invited.getDisplayNameData().displayName().get()).append(Text.of(" to your group.")).build());
     }
 
     private void registerInvitation(PendingInvitation pendingInvitation) {
