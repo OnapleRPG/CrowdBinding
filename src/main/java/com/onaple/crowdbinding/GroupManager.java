@@ -3,6 +3,12 @@ package com.onaple.crowdbinding;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,6 +32,9 @@ public class GroupManager {
 
     @Inject
     private Logger logger;
+
+    @Inject
+    private EventManager eventManager;
 
     Group createAndRegisterGroup(UUID... players) {
         Group group = new Group(players);
@@ -66,8 +75,9 @@ public class GroupManager {
         return true;
     }
 
-    void processInvitationAccepted(PendingInvitation invitation) {
-        Preconditions.checkArgument(pendingInvitationsMap.containsKey(invitation.getUuid()), "The accepted invitation was not found");
+    void processInvitationAccepted(UUID invitationUuid) {
+        PendingInvitation invitation = pendingInvitationsMap.get(invitationUuid);
+        Preconditions.checkNotNull(invitation,"The accepted invitation was not found");
         Group invitersGroup = getGroupFromPlayerUuid(invitation.getInviter())
                 .orElse(createAndRegisterGroup(invitation.getInviter()));
 
@@ -75,6 +85,38 @@ public class GroupManager {
         getGroupFromPlayerUuid(invitation.getInvited()).ifPresent(group -> processPlayerLeaveGroup(invitation.getInvited()));
         processPlayerJoinGroup(invitation.getInvited(), invitersGroup);
         pendingInvitationsMap.remove(invitation.getUuid(), invitation);
+    }
+
+    public void processInvitationDenied(UUID invitationUuid) {
+        // TODO
+    }
+
+    void processInvitationSent(Player inviter, Player invited) {
+        // TODO
+        PendingInvitation pendingInvitation = new PendingInvitation(inviter.getUniqueId(), invited.getUniqueId());
+        registerInvitation(pendingInvitation);
+        Text acceptClickableText = Text.builder("[Accept]")
+                .color(TextColors.GREEN)
+                .onClick(TextActions.runCommand("group accept " + pendingInvitation.getUuid().toString()))
+                .onHover(TextActions.showText(Text.of("Accept this invitation")))
+                .build();
+
+        Text denyClickableText = Text.builder("[Deny]")
+                .color(TextColors.RED)
+                .onClick(TextActions.runCommand("group deny " + pendingInvitation.getUuid().toString()))
+                .onHover(TextActions.showText(Text.of("Deny this invitation")))
+                .build();
+
+        Text invitationText = Text.builder().append(inviter.getDisplayNameData().displayName().get())
+                .append(Text.of(" invites you to join his group: "))
+                .append(acceptClickableText)
+                .append(Text.of(" "))
+                .append(denyClickableText)
+                .build();
+    }
+
+    private void registerInvitation(PendingInvitation pendingInvitation) {
+        this.pendingInvitationsMap.put(pendingInvitation.getUuid(), pendingInvitation);
     }
 
     void processPlayerJoinGroup(UUID joiningPlayer, Group joinedGroup) {
@@ -90,4 +132,5 @@ public class GroupManager {
     public Optional<Group> getGroup(Player player) {
         return this.getGroupFromPlayerUuid(player.getUniqueId());
     }
+
 }
