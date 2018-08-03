@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.1.2")
+@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.1.3")
 @Singleton
 /**
  * CrowdBinding main class, a plugin that allows players to create and manage groups of players.
