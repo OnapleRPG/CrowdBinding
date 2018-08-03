@@ -150,7 +150,11 @@ public class GroupManager {
                 .build();
 
         invited.sendMessage(invitationText);
-        inviter.sendMessage(Text.builder("You invited ").append(invited.getDisplayNameData().displayName().get()).append(Text.of(" to your group.")).build());
+        inviter.sendMessage(
+                Text.builder("You invited ").append(invited.getDisplayNameData().displayName().get())
+                .append(Text.of(" to your group."))
+                .build()
+        );
     }
 
     private void registerInvitation(PendingInvitation pendingInvitation) {
