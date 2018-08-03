@@ -23,4 +23,4 @@ deploy:
     - rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/build/libs/* aventurier@onaple.fr:~/sponge-server-1.12/mods/
   on:
     tags: true
-all_branches: false
+    all_branches: false
