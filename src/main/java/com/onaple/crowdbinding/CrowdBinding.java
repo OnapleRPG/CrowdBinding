@@ -1,9 +1,6 @@
 package com.onaple.crowdbinding;
 
-import com.onaple.crowdbinding.commands.AcceptCommand;
-import com.onaple.crowdbinding.commands.DenyCommand;
-import com.onaple.crowdbinding.commands.InviteCommand;
-import com.onaple.crowdbinding.commands.ListCommand;
+import com.onaple.crowdbinding.commands.*;
 import com.onaple.crowdbinding.data.Group;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandManager;
@@ -70,6 +67,12 @@ public class CrowdBinding {
                 .executor(new ListCommand())
                 .build();
 
+        CommandSpec leaveSpec = CommandSpec.builder()
+                .description(Text.of("Leave your current group"))
+                .permission("crowdbinding.commands.leave")
+                .executor(new LeaveCommand())
+                .build();
+
         CommandSpec groupSpec = CommandSpec.builder()
                 .description(Text.of("Group view and management"))
                 .permission("crowdbinding.commands.*")
@@ -77,6 +80,7 @@ public class CrowdBinding {
                 .child(acceptSpec, "accept")
                 .child(denySpec, "deny")
                 .child(listSpec, "list")
+                .child(leaveSpec, "leave")
                 .build();
 
         commandManager.register(this, groupSpec, "group");

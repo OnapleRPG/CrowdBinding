@@ -31,7 +31,7 @@ public class ListCommand implements CommandExecutor {
         }
 
         Player source = (Player) src;
-        Optional<Group> groupOptional = this.groupManager.getGroup(source);
+        Optional<Group> groupOptional = this.groupManager.getPlayerGroup(source);
 
         if (!groupOptional.isPresent()) {
             source.sendMessage(Text.of("You have no group."));

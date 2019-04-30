@@ -1,6 +1,10 @@
 package com.onaple.crowdbinding.commands;
 
 import com.onaple.crowdbinding.GroupManager;
+import com.onaple.crowdbinding.exceptions.SenderJoinedAnotherGroupException;
+import com.onaple.crowdbinding.exceptions.SenderLeftGroupException;
+import com.onaple.crowdbinding.exceptions.UnknownGroupException;
+import com.onaple.crowdbinding.exceptions.UnknownInvitationException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -24,9 +28,19 @@ public class AcceptCommand implements CommandExecutor {
         }
 
         Player source = (Player) src;
-        UUID inviteUuid = UUID.fromString(args.<String>getOne("invitation").get());
-        this.groupManager.processInvitationAccepted(inviteUuid);
+        String invitation = args.<String>getOne("invitation").orElse("");
+        if (invitation.isEmpty()) {
+            src.sendMessage(Text.of("Unrecognized invitation code."));
+            return CommandResult.empty();
+        }
 
-        return CommandResult.success();
+        UUID inviteUuid = UUID.fromString(invitation);
+        try {
+            this.groupManager.acceptInvitation(source, inviteUuid);
+            return CommandResult.success();
+        } catch (UnknownGroupException | UnknownInvitationException | SenderLeftGroupException | SenderJoinedAnotherGroupException e) {
+            src.sendMessage(Text.of(e.toString()));
+            return CommandResult.empty();
+        }
     }
 }

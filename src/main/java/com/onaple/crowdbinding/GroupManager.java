@@ -1,177 +1,156 @@
 package com.onaple.crowdbinding;
 
-import com.google.common.base.Preconditions;
 import com.onaple.crowdbinding.data.Group;
-import com.onaple.crowdbinding.data.PendingInvitation;
-import org.slf4j.Logger;
-import org.spongepowered.api.Game;
+import com.onaple.crowdbinding.data.Invitation;
+import com.onaple.crowdbinding.exceptions.*;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Singleton
 public class GroupManager {
-    /**
-     * A mapping for any player to his group.
-     */
-    private final Map<UUID, Group> groups = new HashMap<>();
+    private final List<Group> groups = new ArrayList<>();
+    private final List<Invitation> invitations = new ArrayList<>();
 
-    /**
-     * A mapping of all the currently pending invitations to any group. The key {@code UUID} is the unique identifier
-     * of the invitation.
-     */
-    private final Map<UUID, PendingInvitation> pendingInvitationsMap = new HashMap<>();
-
-    @Inject
-    private Logger logger;
-
-    @Inject
-    private Game game;
-
-    @Inject
-    private EventManager eventManager;
-
-    Group createAndRegisterGroup(UUID... players) {
-        Group group = new Group(players);
-        for (UUID playerUuid : players) {
-            this.groups.put(playerUuid, group);
+    public void createInvitation(Player inviter, Player invited) {
+        // Look for inviter's group
+        UUID groupId = null;
+        outerloop:
+        for(Group g : groups) {
+            for(UUID p : g.getPlayers()) {
+                if (p.equals(inviter.getUniqueId())) {
+                    groupId = g.getUuid();
+                    break outerloop;
+                }
+            }
         }
-
-        return group;
+        // Create invitation
+        Invitation invitation = new Invitation(groupId, inviter, invited);
+        invitations.add(invitation);
+        // Send invitation into chat
+        sendInvitationIntoChat(invited, inviter, invitation.getUuid());
     }
 
-
-    /**
-     * @return {@code true} if the left process succeed, {@code false} if it failed or has been cancelled
-     */
-    boolean processPlayerLeaveGroup(UUID player) {
-        Optional<Group> potentialGroup = getGroupFromPlayerUuid(player);
-
-        if (!potentialGroup.isPresent()) {
-            logger.warn("Player {} left a group but had no group.", player);
-            return false;
-        }
-        Group leftGroup = potentialGroup.get();
-        if (!leftGroup.getPlayers().remove(player)) {
-            logger.warn("Player {} left a group he was not part of.", player);
-        }
-
-        if (!groups.remove(player, leftGroup)) {
-            logger.warn("Player {} left an unregistered or wrongly registered group.", player);
-        }
-
-        // We do not allow a group of 1 player, so if there were only 2 players in the left group,
-        // we destroy it.
-        if (leftGroup.getPlayers().size() == 1) {
-            UUID orphan = leftGroup.getPlayers().iterator().next();
-            leftGroup.getPlayers().clear();
-            groups.remove(orphan, leftGroup);
-        }
-        return true;
-    }
-
-    public void processInvitationAccepted(UUID invitationUuid) {
-        PendingInvitation invitation = pendingInvitationsMap.get(invitationUuid);
-        Preconditions.checkNotNull(invitation,"The accepted invitation was not found");
-        Player inviter = this.game.getServer().getPlayer(invitation.getInviter()).get();
-        Player invited = this.game.getServer().getPlayer(invitation.getInvited()).get();
-        Group invitersGroup = getGroupFromPlayerUuid(invitation.getInviter())
-                .orElse(createAndRegisterGroup(invitation.getInviter()));
-
-        // The invited leaves his previous group if she/he had one
-        getGroup(invited).ifPresent(group -> processPlayerLeaveGroup(invitation.getInvited()));
-        processPlayerJoinGroup(invitation.getInvited(), invitersGroup);
-
-        pendingInvitationsMap.remove(invitation.getUuid(), invitation);
-
-        invited.sendMessage(
-                Text.builder("You joined ")
-                        .append(inviter.getDisplayNameData().displayName().get())
-                        .append(Text.of("'s group."))
-                        .build()
-        );
-        inviter.sendMessage(
-                Text.builder()
-                        .append(invited.getDisplayNameData().displayName().get())
-                        .append(Text.of("joined your group."))
-                        .build()
-        );
-    }
-
-    public void processInvitationDenied(UUID invitationUuid) {
-        PendingInvitation invitation = pendingInvitationsMap.get(invitationUuid);
-        Preconditions.checkNotNull(invitation,"The denied invitation was not found");
-        Player inviter = this.game.getServer().getPlayer(invitation.getInviter()).get();
-        Player invited = this.game.getServer().getPlayer(invitation.getInvited()).get();
-        pendingInvitationsMap.remove(invitation.getUuid(), invitation);
-        invited.sendMessage(
-                Text.builder("You denied ")
-                        .append(inviter.getDisplayNameData().displayName().get())
-                        .append(Text.of("'s invitation."))
-                        .build()
-        );
-        inviter.sendMessage(
-                Text.builder()
-                        .append(invited.getDisplayNameData().displayName().get())
-                        .append(Text.of("denied your invitation."))
-                        .build()
-        );
-    }
-
-    public void processInvitationSent(Player inviter, Player invited) {
-        PendingInvitation pendingInvitation = new PendingInvitation(inviter.getUniqueId(), invited.getUniqueId());
-        registerInvitation(pendingInvitation);
+    private void sendInvitationIntoChat(Player invited, Player inviter, UUID groupId) {
         Text acceptClickableText = Text.builder("[Accept]")
                 .color(TextColors.GREEN)
-                .onClick(TextActions.runCommand("/group accept " + pendingInvitation.getUuid().toString()))
+                .onClick(TextActions.runCommand("/group accept " + groupId.toString()))
                 .onHover(TextActions.showText(Text.of("Accept this invitation")))
                 .build();
-
         Text denyClickableText = Text.builder("[Deny]")
                 .color(TextColors.RED)
-                .onClick(TextActions.runCommand("/group deny " + pendingInvitation.getUuid().toString()))
+                .onClick(TextActions.runCommand("/group deny " + groupId.toString()))
                 .onHover(TextActions.showText(Text.of("Deny this invitation")))
                 .build();
-
         Text invitationText = Text.builder().append(inviter.getDisplayNameData().displayName().get())
                 .append(Text.of(" invites you to join his group: "))
                 .append(acceptClickableText)
                 .append(Text.of(" "))
                 .append(denyClickableText)
                 .build();
-
         invited.sendMessage(invitationText);
         inviter.sendMessage(
                 Text.builder("You invited ").append(invited.getDisplayNameData().displayName().get())
-                .append(Text.of(" to your group."))
-                .build()
+                        .append(Text.of(" to your group."))
+                        .build()
         );
     }
 
-    private void registerInvitation(PendingInvitation pendingInvitation) {
-        this.pendingInvitationsMap.put(pendingInvitation.getUuid(), pendingInvitation);
+    public void denyInvitation(Player invited, UUID invitationId) throws UnknownGroupException {
+        // Find matching invitation
+        Optional<Invitation> invitation = invitations.stream().filter(i -> i.getGroupId() == invitationId).findAny();
+        if (!invitation.isPresent()) {
+            throw new UnknownGroupException("Cannot deny non existing invitation.");
+        }
+        // Send messages
+        invitation.get().getInviter().sendMessage(
+                Text.builder(invited.getDisplayNameData().displayName().toString())
+                        .append(Text.of(" denied your invitation."))
+                        .build()
+        );
+        invited.sendMessage(
+                Text.builder("You denied ")
+                        .append(invitation.get().getInviter().getDisplayNameData().displayName().get())
+                        .append(Text.of("'s invitation."))
+                        .build()
+        );
+        // Remove invitation
+        invitations.remove(invitation.get());
     }
 
-    void processPlayerJoinGroup(UUID joiningPlayer, Group joinedGroup) {
-        Preconditions.checkArgument(!getGroupFromPlayerUuid(joiningPlayer).isPresent());
-        groups.put(joiningPlayer, joinedGroup);
-        joinedGroup.getPlayers().add(joiningPlayer);
+    public void acceptInvitation(Player invited, UUID invitationId) throws UnknownGroupException,
+            UnknownInvitationException, SenderLeftGroupException, SenderJoinedAnotherGroupException {
+        // Find matching invitation
+        Optional<Invitation> invitation = invitations.stream().filter(i -> i.getGroupId() == invitationId).findAny();
+        if (!invitation.isPresent()) {
+            throw new UnknownInvitationException("Cannot accept non existing invitation.");
+        }
+        if (invitation.get().getGroupId() != null) {
+            // Try to join existing group
+            Optional<Group> groupOptional = groups.stream().filter(g -> g.getUuid() == invitation.get().getGroupId()).findAny();
+            if (!groupOptional.isPresent()) {
+                invitations.remove(invitation.get());
+                throw new UnknownGroupException("Cannot accept invitation to non existing group.");
+            }
+            if (!groupOptional.get().getPlayers().contains(invitation.get().getInviter().getUniqueId())) {
+                invitations.remove(invitation.get());
+                throw new SenderLeftGroupException("Sender left the group you were invited to.");
+            }
+            Group group = groupOptional.get();
+            group.addPlayer(invited.getUniqueId());
+            groups.set(groups.indexOf(groupOptional.get()), group);
+        } else {
+            // Try to join new group
+            Optional<Group> existingGroupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(invitation.get().getInviter().getUniqueId()))).findAny();
+            if (!existingGroupOptional.isPresent()) {
+                Group newGroup = new Group(invitation.get().getInviter().getUniqueId());
+                newGroup.addPlayer(invited.getUniqueId());
+                groups.add(newGroup);
+            } else {
+                Group existingGroup = existingGroupOptional.get();
+                if (existingGroup.getLeader().equals(invitation.get().getInviter().getUniqueId())) {
+                    existingGroup.addPlayer(invited.getUniqueId());
+                    groups.set(groups.indexOf(existingGroupOptional.get()), existingGroup);
+                } else {
+                    invitations.remove(invitation.get());
+                    throw new SenderJoinedAnotherGroupException("Sender joined another group.");
+                }
+            }
+        }
+        // Send messages
+        invitation.get().getInviter().sendMessage(
+                Text.builder(invited.getDisplayNameData().displayName().toString())
+                        .append(Text.of(" accepted your invitation."))
+                        .build()
+        );
+        invited.sendMessage(
+                Text.builder("You accepted ")
+                        .append(invitation.get().getInviter().getDisplayNameData().displayName().get())
+                        .append(Text.of("'s invitation."))
+                        .build()
+        );
+        // Remove invitation
+        invitations.remove(invitation.get());
     }
 
-    public Optional<Group> getGroupFromPlayerUuid(UUID uuid) {
-        return Optional.ofNullable(groups.get(uuid));
+    public boolean leaveGroup(Player player) {
+        Optional<Group> groupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(player.getUniqueId()))).findAny();
+        if (!groupOptional.isPresent()) {
+            player.sendMessage(Text.of("You currently do not belong to a group."));
+            return false;
+        }
+        Group group = groupOptional.get();
+        group.removePlayer(player.getUniqueId());
+        groups.set(groups.indexOf(groupOptional.get()), group);
+        player.sendMessage(Text.of("You left your group."));
+        return true;
     }
 
-    public Optional<Group> getGroup(Player player) {
-        return this.getGroupFromPlayerUuid(player.getUniqueId());
+    public Optional<Group> getPlayerGroup(Player player) {
+        return groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(player.getUniqueId()))).findAny();
     }
 }

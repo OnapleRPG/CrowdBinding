@@ -1,6 +1,8 @@
 package com.onaple.crowdbinding.commands;
 
 import com.onaple.crowdbinding.GroupManager;
+import com.onaple.crowdbinding.exceptions.MissingPlayerInvitationException;
+import com.onaple.crowdbinding.exceptions.UnknownGroupException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -24,8 +26,19 @@ public class DenyCommand implements CommandExecutor {
         }
 
         Player source = (Player) src;
-        UUID inviteUuid = UUID.fromString(args.<String>getOne("invitation").get());
-        this.groupManager.processInvitationDenied(inviteUuid);
-        return CommandResult.success();
+        String invitation = args.<String>getOne("invitation").orElse("");
+        if (invitation.isEmpty()) {
+            src.sendMessage(Text.of("Unrecognized invitation code."));
+            return CommandResult.empty();
+        }
+
+        UUID inviteUuid = UUID.fromString(invitation);
+        try {
+            this.groupManager.denyInvitation(source, inviteUuid);
+            return CommandResult.success();
+        } catch (UnknownGroupException e) {
+            src.sendMessage(Text.of(e.toString()));
+            return CommandResult.empty();
+        }
     }
 }

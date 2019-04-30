@@ -1,43 +1,36 @@
 package com.onaple.crowdbinding.commands;
 
 import com.onaple.crowdbinding.GroupManager;
+import com.onaple.crowdbinding.data.Group;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
 import javax.inject.Inject;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class InviteCommand implements CommandExecutor {
+public class LeaveCommand implements CommandExecutor {
     @Inject
     private GroupManager groupManager;
 
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-
         if (!(src instanceof Player)) {
             src.sendMessage(Text.of("You must be in game to run this command."));
             return CommandResult.empty();
         }
 
-        Player sender = (Player) src;
-        Optional<Player> recipient = args.<Player>getOne("recipient");
-        if (!recipient.isPresent()) {
-            sender.sendMessage(Text.of("Recipient not found."));
-            return CommandResult.empty();
-        }
+        Player source = (Player) src;
+        boolean leftGroup = groupManager.leaveGroup(source);
 
-        if (sender.equals(recipient.get())) {
-            sender.sendMessage(Text.of("You cannot invite yourself into a group."));
-            return CommandResult.empty();
-        }
-
-        this.groupManager.createInvitation(sender, recipient.get());
-
-        return CommandResult.success();
+        return leftGroup ? CommandResult.success() : CommandResult.empty();
     }
 }
