@@ -1,14 +1,14 @@
 package com.onaple.crowdbinding;
 
 import com.google.common.base.Preconditions;
+import com.onaple.crowdbinding.data.Group;
+import com.onaple.crowdbinding.data.PendingInvitation;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
 import javax.inject.Inject;
@@ -79,7 +79,7 @@ public class GroupManager {
         return true;
     }
 
-    void processInvitationAccepted(UUID invitationUuid) {
+    public void processInvitationAccepted(UUID invitationUuid) {
         PendingInvitation invitation = pendingInvitationsMap.get(invitationUuid);
         Preconditions.checkNotNull(invitation,"The accepted invitation was not found");
         Player inviter = this.game.getServer().getPlayer(invitation.getInviter()).get();
@@ -107,7 +107,7 @@ public class GroupManager {
         );
     }
 
-    void processInvitationDenied(UUID invitationUuid) {
+    public void processInvitationDenied(UUID invitationUuid) {
         PendingInvitation invitation = pendingInvitationsMap.get(invitationUuid);
         Preconditions.checkNotNull(invitation,"The denied invitation was not found");
         Player inviter = this.game.getServer().getPlayer(invitation.getInviter()).get();
@@ -127,7 +127,7 @@ public class GroupManager {
         );
     }
 
-    void processInvitationSent(Player inviter, Player invited) {
+    public void processInvitationSent(Player inviter, Player invited) {
         PendingInvitation pendingInvitation = new PendingInvitation(inviter.getUniqueId(), invited.getUniqueId());
         registerInvitation(pendingInvitation);
         Text acceptClickableText = Text.builder("[Accept]")

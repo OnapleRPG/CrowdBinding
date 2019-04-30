@@ -1,6 +1,6 @@
 package com.onaple.crowdbinding.event;
 
-import com.onaple.crowdbinding.Group;
+import com.onaple.crowdbinding.data.Group;
 
 public interface TargetGroupEvent {
 

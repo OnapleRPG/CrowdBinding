@@ -1,6 +1,6 @@
 package com.onaple.crowdbinding.event;
 
-import com.onaple.crowdbinding.Group;
+import com.onaple.crowdbinding.data.Group;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.cause.Cause;

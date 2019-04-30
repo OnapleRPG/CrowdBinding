@@ -1,4 +1,4 @@
-package com.onaple.crowdbinding;
+package com.onaple.crowdbinding.data;
 
 import java.util.Objects;
 import java.util.UUID;

@@ -1,5 +1,10 @@
 package com.onaple.crowdbinding;
 
+import com.onaple.crowdbinding.commands.AcceptCommand;
+import com.onaple.crowdbinding.commands.DenyCommand;
+import com.onaple.crowdbinding.commands.InviteCommand;
+import com.onaple.crowdbinding.commands.ListCommand;
+import com.onaple.crowdbinding.data.Group;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandResult;
@@ -42,97 +47,27 @@ public class CrowdBinding {
                 .description(Text.of("Invites a player to your group"))
                 .permission("crowdbinding.commands.invite")
                 .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("recipient"))))
-                .executor((src, args) -> {
-
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of("You must be in game to run this command."));
-                        return CommandResult.empty();
-                    }
-
-                    Player sender = (Player) src;
-                    Player recipient = args.<Player>getOne("recipient").get();
-                    if (sender.equals(recipient)) {
-                        sender.sendMessage(Text.of("Are you sure you want to invite yourself into your group?"));
-                        return CommandResult.empty();
-                    }
-
-                    this.groupManager.processInvitationSent(sender, recipient);
-
-                    return CommandResult.success();
-                })
+                .executor(new InviteCommand())
                 .build();
 
         CommandSpec acceptSpec = CommandSpec.builder()
                 .description(Text.of("Accepts an invitation"))
                 .permission("crowdbinding.commands.accept")
                 .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("invitation"))))
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of("You must be in game to run this command."));
-                        return CommandResult.empty();
-                    }
-
-                    Player source = (Player) src;
-                    UUID inviteUuid = UUID.fromString(args.<String>getOne("invitation").get());
-                    this.groupManager.processInvitationAccepted(inviteUuid);
-                    return CommandResult.success();
-                })
+                .executor(new AcceptCommand())
                 .build();
 
         CommandSpec denySpec = CommandSpec.builder()
                 .description(Text.of("Denies an invitation"))
                 .permission("crowdbinding.commands.deny")
                 .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("invitation"))))
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of("You must be in game to run this command."));
-                        return CommandResult.empty();
-                    }
-
-                    Player source = (Player) src;
-                    UUID inviteUuid = UUID.fromString(args.<String>getOne("invitation").get());
-                    this.groupManager.processInvitationDenied(inviteUuid);
-                    return CommandResult.success();
-                })
+                .executor(new DenyCommand())
                 .build();
 
         CommandSpec listSpec = CommandSpec.builder()
                 .description(Text.of("Prints out the members of your group"))
                 .permission("crowdbinding.commands.list")
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of("You must be in game to run this command."));
-                        return CommandResult.empty();
-                    }
-
-                    Player source = (Player) src;
-                    Optional<Group> groupOptional = this.groupManager.getGroup(source);
-
-                    if (!groupOptional.isPresent()) {
-                        source.sendMessage(Text.of("You have no group."));
-                        return CommandResult.success();
-                    }
-
-                    Group group = groupOptional.get();
-                    Text.Builder builder = Text.builder("Your group's members are: ");
-
-                    builder.append(
-                        Text.of(
-                            group.getPlayers().stream()
-                            .map(this.game.getServer()::getPlayer)
-                            .map(Optional::get)
-                            .map(Player::getDisplayNameData)
-                            .map(DisplayNameData::displayName)
-                            .map(Value::get)
-                            .map(Text::toPlain)
-                            .collect(Collectors.joining(", "))
-                        )
-                    );
-
-                    source.sendMessage(builder.build());
-
-                    return CommandResult.success();
-                })
+                .executor(new ListCommand())
                 .build();
 
         CommandSpec groupSpec = CommandSpec.builder()
