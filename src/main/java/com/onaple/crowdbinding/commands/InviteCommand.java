@@ -9,8 +9,11 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class InviteCommand implements CommandExecutor {
     @Override
@@ -34,12 +37,38 @@ public class InviteCommand implements CommandExecutor {
         }
 
         try {
-            CrowdBinding.getGroupManager().createInvitation(sender, recipient.get());
+            UUID groupUuid = CrowdBinding.getGroupManager().createInvitation(sender, recipient.get());
+            sendInvitationIntoChat(sender, recipient.get(), groupUuid);
         } catch (PlayerAlreadyInAGroupException e) {
             sender.sendMessage(Text.of(e.getMessage()));
             return CommandResult.empty();
         }
 
         return CommandResult.success();
+    }
+
+    private void sendInvitationIntoChat(Player invited, Player inviter, UUID groupId) {
+        Text acceptClickableText = Text.builder("[Accept]")
+                .color(TextColors.GREEN)
+                .onClick(TextActions.runCommand("/group accept " + groupId.toString()))
+                .onHover(TextActions.showText(Text.of("Accept this invitation")))
+                .build();
+        Text denyClickableText = Text.builder("[Deny]")
+                .color(TextColors.RED)
+                .onClick(TextActions.runCommand("/group deny " + groupId.toString()))
+                .onHover(TextActions.showText(Text.of("Deny this invitation")))
+                .build();
+        Text invitationText = Text.builder().append(inviter.getDisplayNameData().displayName().get())
+                .append(Text.of(" invites you to join his group: "))
+                .append(acceptClickableText)
+                .append(Text.of(" "))
+                .append(denyClickableText)
+                .build();
+        invited.sendMessage(invitationText);
+        inviter.sendMessage(
+                Text.builder("You invited ").append(invited.getDisplayNameData().displayName().get())
+                        .append(Text.of(" to your group."))
+                        .build()
+        );
     }
 }

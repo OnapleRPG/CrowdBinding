@@ -1,6 +1,7 @@
 package com.onaple.crowdbinding.commands;
 
 import com.onaple.crowdbinding.CrowdBinding;
+import com.onaple.crowdbinding.exceptions.PlayerNotInGroupException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -8,6 +9,8 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 public class LeaveCommand implements CommandExecutor {
     @Override
@@ -18,8 +21,13 @@ public class LeaveCommand implements CommandExecutor {
         }
 
         Player source = (Player) src;
-        boolean leftGroup = CrowdBinding.getGroupManager().leaveGroup(source);
-
-        return leftGroup ? CommandResult.success() : CommandResult.empty();
+        try {
+            CrowdBinding.getGroupManager().leaveGroup(source);
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You left your group."));
+            return CommandResult.success();
+        } catch (PlayerNotInGroupException e) {
+            src.sendMessage(Text.of(e.getMessage()));
+            return CommandResult.empty();
+        }
     }
 }

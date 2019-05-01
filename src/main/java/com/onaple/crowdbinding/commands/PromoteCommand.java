@@ -12,6 +12,8 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -49,8 +51,11 @@ public class PromoteCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        source.sendMessage(Text.of("You promoted ", playerToPromote.get().getName(), " to group leader."));
-        playerToPromote.get().sendMessage(Text.of(source.getName(), " promoted you to group leader."));
+        groupOptional.get().getPlayers().forEach(p -> p.sendMessage(
+                Text.of(TextStyles.BOLD, playerToPromote, TextStyles.NONE, " is the new group leader.")
+                        .toBuilder().color(TextColors.DARK_AQUA).style(TextStyles.ITALIC).build())
+        );
+
         return CommandResult.success();
     }
 }

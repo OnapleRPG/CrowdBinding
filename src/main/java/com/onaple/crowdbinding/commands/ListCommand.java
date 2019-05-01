@@ -11,6 +11,8 @@ import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,19 +35,22 @@ public class ListCommand implements CommandExecutor {
 
         Group group = groupOptional.get();
         Text.Builder builder = Text.builder("Your group's members are: ");
+        boolean placeComma = false;
+        for(Player p : group.getPlayers()) {
+            if (placeComma) {
+                builder.append(Text.of(", "));
+            }
+            placeComma = true;
+            if (group.getLeader().getName().equals(p.getName())) {
+                builder.append(Text.of(TextStyles.BOLD, p.getName(), TextStyles.NONE));
+            } else {
+                builder.append(Text.of(p.getName()));
+            }
+        }
+        builder.append(Text.of("."));
+        builder.color(TextColors.DARK_AQUA).style(TextStyles.ITALIC);
 
-        builder.append(
-                Text.of(
-                        group.getPlayers().stream()
-                                .map(Player::getDisplayNameData)
-                                .map(DisplayNameData::displayName)
-                                .map(Value::get)
-                                .map(Text::toPlain)
-                                .collect(Collectors.joining(", "))
-                )
-        );
-
-        source.sendMessage(builder.build());
+        src.sendMessage(builder.build());
 
         return CommandResult.success();
     }

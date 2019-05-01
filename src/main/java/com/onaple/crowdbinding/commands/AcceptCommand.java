@@ -9,6 +9,8 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.UUID;
 
@@ -35,12 +37,28 @@ public class AcceptCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
+        Player inviter;
         try {
-            CrowdBinding.getGroupManager().acceptInvitation(source, inviteUuid);
-            return CommandResult.success();
+            inviter = CrowdBinding.getGroupManager().acceptInvitation(source, inviteUuid);
         } catch (UnknownGroupException | UnknownInvitationException | SenderLeftGroupException | ExpiredInvitationException | SenderJoinedAnotherGroupException e) {
             src.sendMessage(Text.of(e.getMessage()));
             return CommandResult.empty();
         }
+
+        inviter.sendMessage(
+                Text.builder(source.getDisplayNameData().displayName().get().toPlain())
+                        .append(Text.of(" accepted your invitation."))
+                        .color(TextColors.DARK_AQUA).style(TextStyles.ITALIC)
+                        .build()
+        );
+        source.sendMessage(
+                Text.builder("You accepted ")
+                        .append(inviter.getDisplayNameData().displayName().get())
+                        .append(Text.of("'s invitation."))
+                        .color(TextColors.DARK_AQUA).style(TextStyles.ITALIC)
+                        .build()
+        );
+
+        return CommandResult.success();
     }
 }

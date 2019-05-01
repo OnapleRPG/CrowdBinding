@@ -5,7 +5,6 @@ import com.onaple.crowdbinding.data.Invitation;
 import com.onaple.crowdbinding.exceptions.*;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
@@ -23,7 +22,7 @@ public class GroupManager {
     private final List<Group> groups = new ArrayList<>();
     private final List<Invitation> invitations = new ArrayList<>();
 
-    public void createInvitation(Player inviter, Player invited) throws PlayerAlreadyInAGroupException {
+    public UUID createInvitation(Player inviter, Player invited) throws PlayerAlreadyInAGroupException {
         // Look for inviter's group
         UUID groupId = null;
         for(Group g : groups) {
@@ -40,35 +39,10 @@ public class GroupManager {
         Invitation invitation = new Invitation(groupId, inviter, invited);
         invitations.add(invitation);
         // Send invitation into chat
-        sendInvitationIntoChat(invited, inviter, invitation.getUuid());
+        return invitation.getUuid();
     }
 
-    private void sendInvitationIntoChat(Player invited, Player inviter, UUID groupId) {
-        Text acceptClickableText = Text.builder("[Accept]")
-                .color(TextColors.GREEN)
-                .onClick(TextActions.runCommand("/group accept " + groupId.toString()))
-                .onHover(TextActions.showText(Text.of("Accept this invitation")))
-                .build();
-        Text denyClickableText = Text.builder("[Deny]")
-                .color(TextColors.RED)
-                .onClick(TextActions.runCommand("/group deny " + groupId.toString()))
-                .onHover(TextActions.showText(Text.of("Deny this invitation")))
-                .build();
-        Text invitationText = Text.builder().append(inviter.getDisplayNameData().displayName().get())
-                .append(Text.of(" invites you to join his group: "))
-                .append(acceptClickableText)
-                .append(Text.of(" "))
-                .append(denyClickableText)
-                .build();
-        invited.sendMessage(invitationText);
-        inviter.sendMessage(
-                Text.builder("You invited ").append(invited.getDisplayNameData().displayName().get())
-                        .append(Text.of(" to your group."))
-                        .build()
-        );
-    }
-
-    public void denyInvitation(Player invited, UUID invitationId) throws UnknownInvitationException,
+    public Player denyInvitation(Player invited, UUID invitationId) throws UnknownInvitationException,
             ExpiredInvitationException {
         // Find matching invitation
         Optional<Invitation> invitation = invitations.stream().filter(i -> i.getUuid().equals(invitationId)).findAny();
@@ -79,23 +53,13 @@ public class GroupManager {
         if (System.currentTimeMillis() - invitation.get().getInviteDate().getTime() > 2*60*1000) {
             throw new ExpiredInvitationException("The invitation is no longer valid.");
         }
-        // Send messages
-        invitation.get().getInviter().sendMessage(
-                Text.builder(invited.getDisplayNameData().displayName().get().toPlain())
-                        .append(Text.of(" denied your invitation."))
-                        .build()
-        );
-        invited.sendMessage(
-                Text.builder("You denied ")
-                        .append(invitation.get().getInviter().getDisplayNameData().displayName().get())
-                        .append(Text.of("'s invitation."))
-                        .build()
-        );
         // Remove invitation
         invitations.remove(invitation.get());
+        // Returns sender so he can be notified
+        return invitation.get().getInviter();
     }
 
-    public void acceptInvitation(Player invited, UUID invitationId) throws UnknownGroupException,
+    public Player acceptInvitation(Player invited, UUID invitationId) throws UnknownGroupException,
             UnknownInvitationException, SenderLeftGroupException, SenderJoinedAnotherGroupException,
             ExpiredInvitationException {
         // Find matching invitation
@@ -109,7 +73,11 @@ public class GroupManager {
         }
         // Leave group if already in group
         if (getPlayerGroup(invited).isPresent()) {
-            leaveGroup(invited);
+            try {
+                leaveGroup(invited);
+            } catch (PlayerNotInGroupException e) {
+                CrowdBinding.getLogger().warn("A group was found but could not be left.");
+            }
         }
         if (invitation.get().getGroupId() != null) {
             // Try to join existing group
@@ -143,27 +111,16 @@ public class GroupManager {
                 }
             }
         }
-        // Send messages
-        invitation.get().getInviter().sendMessage(
-                Text.builder(invited.getDisplayNameData().displayName().get().toPlain())
-                        .append(Text.of(" accepted your invitation."))
-                        .build()
-        );
-        invited.sendMessage(
-                Text.builder("You accepted ")
-                        .append(invitation.get().getInviter().getDisplayNameData().displayName().get())
-                        .append(Text.of("'s invitation."))
-                        .build()
-        );
         // Remove invitation
         invitations.remove(invitation.get());
+        // Returns sender so he can be notified
+        return invitation.get().getInviter();
     }
 
-    public boolean leaveGroup(Player player) {
+    public void leaveGroup(Player player) throws PlayerNotInGroupException {
         Optional<Group> groupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.getUniqueId().equals(player.getUniqueId()))).findAny();
         if (!groupOptional.isPresent()) {
-            player.sendMessage(Text.of("You currently do not belong to a group."));
-            return false;
+            throw new PlayerNotInGroupException("You currently do not belong to a group.");
         }
         Group group = groupOptional.get();
         group.removePlayer(player);
@@ -179,8 +136,6 @@ public class GroupManager {
             group.setFirstLeader();
             groups.set(groups.indexOf(groupOptional.get()), group);
         }
-        player.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You left your group."));
-        return true;
     }
 
     public Optional<Group> getPlayerGroup(Player player) {
@@ -202,6 +157,4 @@ public class GroupManager {
     public Optional<Group> getGroup(UUID groupId) {
         return groups.stream().filter(group -> group.getUuid().equals(groupId)).findAny();
     }
-
-
 }

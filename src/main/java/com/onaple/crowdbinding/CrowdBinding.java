@@ -1,6 +1,7 @@
 package com.onaple.crowdbinding;
 
 import com.onaple.crowdbinding.commands.*;
+import com.onaple.crowdbinding.exceptions.PlayerNotInGroupException;
 import com.onaple.crowdbinding.service.GroupService;
 import com.onaple.crowdbinding.service.SimpleGroupService;
 import org.slf4j.Logger;
@@ -132,7 +133,11 @@ public class CrowdBinding {
 
     @Listener
     public void onClientDisconnect(ClientConnectionEvent.Disconnect clientDisconnectEvent) {
-        groupManager.leaveGroup(clientDisconnectEvent.getTargetEntity());
+        try {
+            groupManager.leaveGroup(clientDisconnectEvent.getTargetEntity());
+        } catch (PlayerNotInGroupException e) {
+            logger.debug(clientDisconnectEvent.getTargetEntity().getName() + " left without a group.");
+        }
     }
 
 }
