@@ -110,13 +110,13 @@ public class CrowdBinding {
     }
 
     @Listener
+    public void gameConstruct(GameConstructionEvent event) {
+        Sponge.getServiceManager().setProvider(getInstance(), GroupService.class, new SimpleGroupService());
+    }
+
+    @Listener
     public void onClientDisconnect(ClientConnectionEvent.Disconnect clientDisconnectEvent) {
         groupManager.leaveGroup(clientDisconnectEvent.getTargetEntity());
     }
 
-    @Listener
-    public void gameConstruct(GameConstructionEvent event) {
-
-        Sponge.getServiceManager().setProvider(getInstance(), GroupService.class, new SimpleGroupService());
-    }
 }

@@ -30,9 +30,6 @@ public class GroupManager {
     private final List<Group> groups = new ArrayList<>();
     private final List<Invitation> invitations = new ArrayList<>();
 
-
-
-
     public void createInvitation(Player inviter, Player invited) throws PlayerAlreadyInAGroupException {
         // Look for inviter's group
         UUID groupId = null;
@@ -176,8 +173,8 @@ public class GroupManager {
         return groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(player.getUniqueId()))).findAny();
     }
 
-        public Optional<Group> getGroup(UUID groupId) {
-        return groups.stream().filter( group -> group.getUuid().equals(groupId)).findAny();
+    public Optional<Group> getGroup(UUID groupId) {
+        return groups.stream().filter(group -> group.getUuid().equals(groupId)).findAny();
     }
 
 
