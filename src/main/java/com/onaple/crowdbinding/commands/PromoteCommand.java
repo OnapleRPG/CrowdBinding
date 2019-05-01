@@ -37,6 +37,11 @@ public class PromoteCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
+        if (source.equals(playerToPromote.get())) {
+            src.sendMessage(Text.of("You are already the group leader."));
+            return CommandResult.empty();
+        }
+
         try {
             CrowdBinding.getGroupManager().promotePlayerWithinGroup(source, groupOptional.get(), playerToPromote.get());
         } catch (InsufficientGroupPermissionException | PlayerNotInGroupException e) {

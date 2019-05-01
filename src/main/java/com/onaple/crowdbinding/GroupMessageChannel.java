@@ -2,6 +2,7 @@ package com.onaple.crowdbinding;
 
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
@@ -46,7 +47,10 @@ public class GroupMessageChannel implements MutableMessageChannel {
         String playerName = (sender instanceof Player) ? ((Player)sender).getName() : "";
         Text text = original;
         if(this.members.contains(recipient)) {
-            text = Text.of(TextColors.DARK_AQUA, "[gr]<", playerName, "> ", text);
+            text = Text.of(TextColors.DARK_AQUA).toBuilder()
+                    .append(Text.of("[gr]").toBuilder().onClick(TextActions.suggestCommand("/gr ")).build())
+                    .append(Text.of("<", playerName, "> ", text))
+                    .build();
         }
         return Optional.of(text);
     }
