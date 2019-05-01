@@ -10,21 +10,15 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Singleton
 public class GroupManager {
-
-    private Server server;
-
     public GroupManager() {
-        server = Sponge.getServer();
     }
 
     private final List<Group> groups = new ArrayList<>();
@@ -137,7 +131,7 @@ public class GroupManager {
                 groups.add(newGroup);
             } else {
                 Group existingGroup = existingGroupOptional.get();
-                if (existingGroup.getLeader().equals(invitation.get().getInviter().getUniqueId())) {
+                if (existingGroup.getLeader().equals(invitation.get().getInviter())) {
                     existingGroup.addPlayer(invited);
                     groups.set(groups.indexOf(existingGroupOptional.get()), existingGroup);
                 } else {
