@@ -92,6 +92,13 @@ public class CrowdBinding {
                 .executor(new LeaveCommand())
                 .build();
 
+        CommandSpec promoteSpec = CommandSpec.builder()
+                .description(Text.of("Promote a group member as leader"))
+                .permission("crowdbinding.commands.promote")
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+                .executor(new PromoteCommand())
+                .build();
+
         CommandSpec groupSpec = CommandSpec.builder()
                 .description(Text.of("Group view and management"))
                 .permission("crowdbinding.commands.*")
@@ -100,6 +107,7 @@ public class CrowdBinding {
                 .child(denySpec, "deny")
                 .child(listSpec, "list")
                 .child(leaveSpec, "leave")
+                .child(promoteSpec, "promote")
                 .build();
 
         commandManager.register(this, chatSpec, "gr");

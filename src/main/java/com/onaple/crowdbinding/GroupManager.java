@@ -25,11 +25,11 @@ public class GroupManager {
         // Look for inviter's group
         UUID groupId = null;
         for(Group g : groups) {
-            for(UUID p : g.getPlayers()) {
-                if (p.equals(inviter.getUniqueId())) {
+            for(Player p : g.getPlayers()) {
+                if (p.getUniqueId().equals(inviter.getUniqueId())) {
                     groupId = g.getUuid();
                 }
-                if (p.equals(invited.getUniqueId())) {
+                if (p.getUniqueId().equals(invited.getUniqueId())) {
                     throw new PlayerAlreadyInAGroupException("The player you tried to invite is already in a group.");
                 }
             }
@@ -74,7 +74,7 @@ public class GroupManager {
         }
         // Send messages
         invitation.get().getInviter().sendMessage(
-                Text.builder(invited.getDisplayNameData().displayName().get().toString())
+                Text.builder(invited.getDisplayNameData().displayName().get().toPlain())
                         .append(Text.of(" denied your invitation."))
                         .build()
         );
@@ -102,7 +102,7 @@ public class GroupManager {
                 invitations.remove(invitation.get());
                 throw new UnknownGroupException("Cannot accept invitation to non existing group.");
             }
-            if (!groupOptional.get().getPlayers().contains(invitation.get().getInviter().getUniqueId())) {
+            if (groupOptional.get().getPlayers().stream().noneMatch(p -> p.getUniqueId().equals(invitation.get().getInviter().getUniqueId()))) {
                 invitations.remove(invitation.get());
                 throw new SenderLeftGroupException("Sender left the group you were invited to.");
             }
@@ -111,9 +111,9 @@ public class GroupManager {
             groups.set(groups.indexOf(groupOptional.get()), group);
         } else {
             // Try to join new group
-            Optional<Group> existingGroupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(invitation.get().getInviter().getUniqueId()))).findAny();
+            Optional<Group> existingGroupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.getUniqueId().equals(invitation.get().getInviter().getUniqueId()))).findAny();
             if (!existingGroupOptional.isPresent()) {
-                Group newGroup = new Group(invitation.get().getInviter().getUniqueId());
+                Group newGroup = new Group(invitation.get().getInviter());
                 newGroup.addPlayer(invited);
                 groups.add(newGroup);
             } else {
@@ -129,7 +129,7 @@ public class GroupManager {
         }
         // Send messages
         invitation.get().getInviter().sendMessage(
-                Text.builder(invited.getDisplayNameData().displayName().get().toString())
+                Text.builder(invited.getDisplayNameData().displayName().get().toPlain())
                         .append(Text.of(" accepted your invitation."))
                         .build()
         );
@@ -144,7 +144,7 @@ public class GroupManager {
     }
 
     public boolean leaveGroup(Player player) {
-        Optional<Group> groupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(player.getUniqueId()))).findAny();
+        Optional<Group> groupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.getUniqueId().equals(player.getUniqueId()))).findAny();
         if (!groupOptional.isPresent()) {
             player.sendMessage(Text.of("You currently do not belong to a group."));
             return false;
@@ -154,6 +154,7 @@ public class GroupManager {
         if (group.getPlayers().size() <= 1) {
             groups.remove(groups.indexOf(groupOptional.get()));
         } else {
+            group.setFirstLeader();
             groups.set(groups.indexOf(groupOptional.get()), group);
         }
         player.sendMessage(Text.of("You left your group."));
@@ -161,6 +162,18 @@ public class GroupManager {
     }
 
     public Optional<Group> getPlayerGroup(Player player) {
-        return groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(player.getUniqueId()))).findAny();
+        return groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.getUniqueId().equals(player.getUniqueId()))).findAny();
+    }
+
+    public void promotePlayerWithinGroup(Player requester, Group group, Player playerToPromote) throws InsufficientGroupPermissionException, PlayerNotInGroupException {
+        if (!group.getLeader().getUniqueId().equals(requester.getUniqueId())) {
+            throw new InsufficientGroupPermissionException("You must be the leader of your group to promote someone else.");
+        }
+
+        if (group.getPlayers().stream().noneMatch(p -> p.equals(playerToPromote))) {
+            throw new PlayerNotInGroupException("The player you tried to promote is not part of your group.");
+        }
+
+        group.setLeader(playerToPromote);
     }
 }

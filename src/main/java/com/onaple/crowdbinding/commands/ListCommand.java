@@ -37,8 +37,6 @@ public class ListCommand implements CommandExecutor {
         builder.append(
                 Text.of(
                         group.getPlayers().stream()
-                                .map(CrowdBinding.getGame().getServer()::getPlayer)
-                                .map(Optional::get)
                                 .map(Player::getDisplayNameData)
                                 .map(DisplayNameData::displayName)
                                 .map(Value::get)

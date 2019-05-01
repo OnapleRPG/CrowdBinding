@@ -11,21 +11,22 @@ import java.util.UUID;
  * Represents a group of players.
  */
 public class Group {
-    private UUID leader;
-    private Collection<UUID> players = new HashSet<>();
+    private Player leader;
+    private Collection<Player> players = new HashSet<>();
     private UUID uuid = UUID.randomUUID();
     private GroupMessageChannel messageChannel;
 
-    public Group(UUID player) {
+    public Group(Player player) {
         leader = player;
         this.players.add(player);
         messageChannel = new GroupMessageChannel();
+        messageChannel.addMember(player);
     }
 
-    public UUID getLeader() {
+    public Player getLeader() {
         return leader;
     }
-    public Collection<UUID> getPlayers() {
+    public Collection<Player> getPlayers() {
         return players;
     }
     public UUID getUuid() {
@@ -36,11 +37,20 @@ public class Group {
     }
 
     public void addPlayer(Player player) {
-        players.add(player.getUniqueId());
+        players.add(player);
         messageChannel.addMember(player);
     }
     public void removePlayer(Player player) {
-        players.remove(player.getUniqueId());
+        players.remove(player);
         messageChannel.removeMember(player);
+    }
+
+    public void setFirstLeader() {
+        if (players.size() > 0) {
+            leader = players.iterator().next();
+        }
+    }
+    public void setLeader(Player player) {
+        leader = player;
     }
 }
