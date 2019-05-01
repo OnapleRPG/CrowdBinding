@@ -1,6 +1,7 @@
 package com.onaple.crowdbinding.commands;
 
 import com.onaple.crowdbinding.CrowdBinding;
+import com.onaple.crowdbinding.exceptions.ExpiredInvitationException;
 import com.onaple.crowdbinding.exceptions.UnknownInvitationException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -38,7 +39,7 @@ public class DenyCommand implements CommandExecutor {
         try {
             CrowdBinding.getGroupManager().denyInvitation(source, inviteUuid);
             return CommandResult.success();
-        } catch (UnknownInvitationException e) {
+        } catch (UnknownInvitationException | ExpiredInvitationException e) {
             src.sendMessage(Text.of(e.getMessage()));
             return CommandResult.empty();
         }

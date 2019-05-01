@@ -1,10 +1,7 @@
 package com.onaple.crowdbinding.commands;
 
 import com.onaple.crowdbinding.CrowdBinding;
-import com.onaple.crowdbinding.exceptions.SenderJoinedAnotherGroupException;
-import com.onaple.crowdbinding.exceptions.SenderLeftGroupException;
-import com.onaple.crowdbinding.exceptions.UnknownGroupException;
-import com.onaple.crowdbinding.exceptions.UnknownInvitationException;
+import com.onaple.crowdbinding.exceptions.*;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -41,7 +38,7 @@ public class AcceptCommand implements CommandExecutor {
         try {
             CrowdBinding.getGroupManager().acceptInvitation(source, inviteUuid);
             return CommandResult.success();
-        } catch (UnknownGroupException | UnknownInvitationException | SenderLeftGroupException | SenderJoinedAnotherGroupException e) {
+        } catch (UnknownGroupException | UnknownInvitationException | SenderLeftGroupException | ExpiredInvitationException | SenderJoinedAnotherGroupException e) {
             src.sendMessage(Text.of(e.getMessage()));
             return CommandResult.empty();
         }

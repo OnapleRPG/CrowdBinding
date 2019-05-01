@@ -66,11 +66,16 @@ public class GroupManager {
         );
     }
 
-    public void denyInvitation(Player invited, UUID invitationId) throws UnknownInvitationException {
+    public void denyInvitation(Player invited, UUID invitationId) throws UnknownInvitationException,
+            ExpiredInvitationException {
         // Find matching invitation
         Optional<Invitation> invitation = invitations.stream().filter(i -> i.getUuid().equals(invitationId)).findAny();
         if (!invitation.isPresent()) {
             throw new UnknownInvitationException("The invitation no longer exists.");
+        }
+        // Checking that invitation is still valid
+        if (System.currentTimeMillis() - invitation.get().getInviteDate().getTime() > 2*60*1000) {
+            throw new ExpiredInvitationException("The invitation is no longer valid.");
         }
         // Send messages
         invitation.get().getInviter().sendMessage(
@@ -89,11 +94,16 @@ public class GroupManager {
     }
 
     public void acceptInvitation(Player invited, UUID invitationId) throws UnknownGroupException,
-            UnknownInvitationException, SenderLeftGroupException, SenderJoinedAnotherGroupException {
+            UnknownInvitationException, SenderLeftGroupException, SenderJoinedAnotherGroupException,
+            ExpiredInvitationException {
         // Find matching invitation
         Optional<Invitation> invitation = invitations.stream().filter(i -> i.getUuid().equals(invitationId)).findAny();
         if (!invitation.isPresent()) {
             throw new UnknownInvitationException("Cannot accept non existing invitation.");
+        }
+        // Checking that invitation is still valid
+        if (System.currentTimeMillis() - invitation.get().getInviteDate().getTime() > 2*60*1000) {
+            throw new ExpiredInvitationException("The invitation is no longer valid.");
         }
         if (invitation.get().getGroupId() != null) {
             // Try to join existing group
