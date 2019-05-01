@@ -2,6 +2,7 @@ package com.onaple.crowdbinding.commands;
 
 import com.onaple.crowdbinding.CrowdBinding;
 import com.onaple.crowdbinding.data.Group;
+import com.onaple.crowdbinding.events.PlayerLeaveGroupEvent;
 import com.onaple.crowdbinding.exceptions.PlayerAlreadyInAGroupException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -9,6 +10,8 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
@@ -56,7 +59,12 @@ public class KickCommand implements CommandExecutor {
 
         CrowdBinding.getGroupManager().kickPlayerFromGroup(groupOptional.get(), kicked.get());
 
+        EventContext context = EventContext.builder().build();
+        Cause cause = Cause.builder().append(source).build(context);
+        CrowdBinding.getEventManager().post(new PlayerLeaveGroupEvent(cause, source, groupOptional.get()));
+
         source.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You kicked ", kicked.get().getName(), " from the group."));
+        kicked.get().sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You were kicked from the group."));
         return CommandResult.success();
     }
 }
