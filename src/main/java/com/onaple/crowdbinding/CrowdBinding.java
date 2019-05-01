@@ -30,7 +30,9 @@ import java.util.Optional;
 /**
  * CrowdBinding main class, a plugin that allows players to create and manage groups of players.
  */
-@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.3.0")
+@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.4.0",
+        description = "Plugin to manage groups",
+        authors = {"Zessirb", "Selki"})
 public class CrowdBinding {
     @Inject
     private void setLogger(Logger logger) {
