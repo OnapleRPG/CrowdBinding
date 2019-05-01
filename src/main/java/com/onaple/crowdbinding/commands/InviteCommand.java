@@ -11,6 +11,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -27,12 +28,12 @@ public class InviteCommand implements CommandExecutor {
         Player sender = (Player) src;
         Optional<Player> recipient = args.<Player>getOne("recipient");
         if (!recipient.isPresent()) {
-            sender.sendMessage(Text.of("Recipient not found."));
+            sender.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "Player not found."));
             return CommandResult.empty();
         }
 
         if (sender.equals(recipient.get())) {
-            sender.sendMessage(Text.of("You cannot invite yourself into a group."));
+            sender.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You cannot invite yourself into a group."));
             return CommandResult.empty();
         }
 
@@ -63,11 +64,14 @@ public class InviteCommand implements CommandExecutor {
                 .append(acceptClickableText)
                 .append(Text.of(" "))
                 .append(denyClickableText)
+                .color(TextColors.DARK_AQUA).style(TextStyles.ITALIC)
                 .build();
         invited.sendMessage(invitationText);
         inviter.sendMessage(
-                Text.builder("You invited ").append(invited.getDisplayNameData().displayName().get())
+                Text.builder("You invited ")
+                        .append(invited.getDisplayNameData().displayName().get())
                         .append(Text.of(" to your group."))
+                        .color(TextColors.DARK_AQUA).style(TextStyles.ITALIC)
                         .build()
         );
     }

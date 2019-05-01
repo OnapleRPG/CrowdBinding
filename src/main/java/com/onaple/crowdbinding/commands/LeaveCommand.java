@@ -12,6 +12,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
+import java.util.Collection;
+
 public class LeaveCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
@@ -22,8 +24,12 @@ public class LeaveCommand implements CommandExecutor {
 
         Player source = (Player) src;
         try {
-            CrowdBinding.getGroupManager().leaveGroup(source);
+            Collection<Player> remainingGroupPlayers = CrowdBinding.getGroupManager().leaveGroup(source);
             src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You left your group."));
+            remainingGroupPlayers.forEach(p -> p.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, source.getName(), " left your group.")));
+            if (remainingGroupPlayers.size() <= 1) {
+                remainingGroupPlayers.forEach(p -> p.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, source.getName(), "The group no longer exists.")));
+            }
             return CommandResult.success();
         } catch (PlayerNotInGroupException e) {
             src.sendMessage(Text.of(e.getMessage()));

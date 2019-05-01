@@ -29,7 +29,7 @@ public class ListCommand implements CommandExecutor {
         Optional<Group> groupOptional = CrowdBinding.getGroupManager().getPlayerGroup(source);
 
         if (!groupOptional.isPresent()) {
-            source.sendMessage(Text.of("You have no group."));
+            source.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You have no group."));
             return CommandResult.success();
         }
 

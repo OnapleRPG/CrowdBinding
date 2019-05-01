@@ -26,7 +26,7 @@ public class DenyCommand implements CommandExecutor {
         Player source = (Player) src;
         String invitation = args.<String>getOne("invitation").orElse("");
         if (invitation.isEmpty()) {
-            src.sendMessage(Text.of("Unrecognized invitation code."));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "Unrecognized invitation code."));
             return CommandResult.empty();
         }
 
@@ -34,7 +34,7 @@ public class DenyCommand implements CommandExecutor {
         try {
             inviteUuid = UUID.fromString(invitation);
         } catch (IllegalArgumentException e) {
-            src.sendMessage(Text.of("Unrecognized invitation code."));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "Unrecognized invitation code."));
             return CommandResult.empty();
         }
 

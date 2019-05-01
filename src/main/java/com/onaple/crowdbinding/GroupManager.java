@@ -4,15 +4,9 @@ import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.data.Invitation;
 import com.onaple.crowdbinding.exceptions.*;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Singleton
 public class GroupManager {
@@ -117,25 +111,20 @@ public class GroupManager {
         return invitation.get().getInviter();
     }
 
-    public void leaveGroup(Player player) throws PlayerNotInGroupException {
+    public Collection<Player> leaveGroup(Player player) throws PlayerNotInGroupException {
         Optional<Group> groupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.getUniqueId().equals(player.getUniqueId()))).findAny();
         if (!groupOptional.isPresent()) {
             throw new PlayerNotInGroupException("You currently do not belong to a group.");
         }
         Group group = groupOptional.get();
         group.removePlayer(player);
-        for (Player groupPlayer : group.getPlayers()) {
-            if (!groupPlayer.equals(player)) {
-                groupPlayer.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, player.getName() + " left your group."));
-            }
-        }
         if (group.getPlayers().size() <= 1) {
-            group.getPlayers().stream().findAny().ifPresent(groupPlayer -> groupPlayer.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "Your group no longer exists.")));
             groups.remove(groups.indexOf(groupOptional.get()));
         } else {
             group.setFirstLeader();
             groups.set(groups.indexOf(groupOptional.get()), group);
         }
+        return group.getPlayers();
     }
 
     public Optional<Group> getPlayerGroup(Player player) {

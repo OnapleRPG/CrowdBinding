@@ -9,6 +9,8 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
 
@@ -23,12 +25,12 @@ public class ChatCommand implements CommandExecutor {
         Player source = (Player) src;
         Optional<Group> groupOptional = CrowdBinding.getGroupManager().getPlayerGroup(source);
         if (!groupOptional.isPresent()) {
-            src.sendMessage(Text.of("You don't have a group to talk to."));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You don't have a group to talk to."));
             return CommandResult.empty();
         }
         Optional<Text> message = args.getOne("message");
         if (!message.isPresent()) {
-            src.sendMessage(Text.of("Cannot send empty message."));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "Cannot send empty message."));
             return CommandResult.empty();
         }
 
