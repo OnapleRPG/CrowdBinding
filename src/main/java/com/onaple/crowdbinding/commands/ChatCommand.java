@@ -32,7 +32,7 @@ public class ChatCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        groupOptional.get().getMessageChannel().send(Text.of(message.get()));
+        groupOptional.get().getMessageChannel().send(source, Text.of(message.get()));
 
         return CommandResult.success();
     }

@@ -44,7 +44,8 @@ public class PromoteCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        src.sendMessage(Text.of("You promoted ", playerToPromote.get(), " to group leader."));
+        source.sendMessage(Text.of("You promoted ", playerToPromote.get().getName(), " to group leader."));
+        playerToPromote.get().sendMessage(Text.of(source.getName(), " promoted you to group leader."));
         return CommandResult.success();
     }
 }
