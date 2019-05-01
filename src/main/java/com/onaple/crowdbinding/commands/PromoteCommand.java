@@ -47,7 +47,7 @@ public class PromoteCommand implements CommandExecutor {
         try {
             CrowdBinding.getGroupManager().promotePlayerWithinGroup(source, groupOptional.get(), playerToPromote.get());
         } catch (InsufficientGroupPermissionException | PlayerNotInGroupException e) {
-            src.sendMessage(Text.of(e.getMessage()));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, e.getMessage()));
             return CommandResult.empty();
         }
 

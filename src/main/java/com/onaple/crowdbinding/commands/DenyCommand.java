@@ -42,7 +42,7 @@ public class DenyCommand implements CommandExecutor {
         try {
             inviter = CrowdBinding.getGroupManager().denyInvitation(source, inviteUuid);
         } catch (UnknownInvitationException | ExpiredInvitationException e) {
-            src.sendMessage(Text.of(e.getMessage()));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, e.getMessage()));
             return CommandResult.empty();
         }
 

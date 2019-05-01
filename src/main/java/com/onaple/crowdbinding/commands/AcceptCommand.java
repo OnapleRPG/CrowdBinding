@@ -41,7 +41,7 @@ public class AcceptCommand implements CommandExecutor {
         try {
             inviter = CrowdBinding.getGroupManager().acceptInvitation(source, inviteUuid);
         } catch (UnknownGroupException | UnknownInvitationException | SenderLeftGroupException | ExpiredInvitationException | SenderJoinedAnotherGroupException e) {
-            src.sendMessage(Text.of(e.getMessage()));
+            src.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, e.getMessage()));
             return CommandResult.empty();
         }
 

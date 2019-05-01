@@ -1,5 +1,6 @@
 package com.onaple.crowdbinding;
 
+import com.onaple.crowdbinding.data.Group;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -7,6 +8,7 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.channel.MutableMessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.*;
 
@@ -44,12 +46,18 @@ public class GroupMessageChannel implements MutableMessageChannel {
 
     @Override
     public Optional<Text> transformMessage(Object sender, MessageReceiver recipient, Text original, ChatType type) {
-        String playerName = (sender instanceof Player) ? ((Player)sender).getName() : "";
+        if (!(sender instanceof Player)) {
+            return Optional.empty();
+        }
+        Player player = (Player)sender;
+        Optional<Group> groupOptional = CrowdBinding.getGroupManager().getPlayerGroup(player);
+        String playerName = ((Player)sender).getName();
+        boolean isLeader = groupOptional.isPresent() && groupOptional.get().getLeader().equals(player);
         Text text = original;
         if(this.members.contains(recipient)) {
             text = Text.of(TextColors.DARK_AQUA).toBuilder()
                     .append(Text.of("[gr]").toBuilder().onClick(TextActions.suggestCommand("/gr ")).build())
-                    .append(Text.of("<", playerName, "> ", text))
+                    .append(Text.of("<", isLeader ? TextStyles.BOLD : "", playerName, isLeader ? TextStyles.NONE : "" "> ", text))
                     .build();
         }
         return Optional.of(text);

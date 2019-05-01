@@ -12,6 +12,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
 
@@ -26,7 +28,7 @@ public class LeaveCommand implements CommandExecutor {
 
         Optional<Group> groupOptional = CrowdBinding.getGroupManager().getPlayerGroup(source);
         if (!groupOptional.isPresent()) {
-            source.sendMessage(Text.of("You do not belong to a group."));
+            source.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You do not belong to a group."));
             return CommandResult.empty();
         }
         Group group = groupOptional.get();

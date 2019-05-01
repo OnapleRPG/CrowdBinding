@@ -41,7 +41,7 @@ public class InviteCommand implements CommandExecutor {
             UUID groupUuid = CrowdBinding.getGroupManager().createInvitation(sender, recipient.get());
             sendInvitationIntoChat(sender, recipient.get(), groupUuid);
         } catch (PlayerAlreadyInAGroupException e) {
-            sender.sendMessage(Text.of(e.getMessage()));
+            sender.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, e.getMessage()));
             return CommandResult.empty();
         }
 

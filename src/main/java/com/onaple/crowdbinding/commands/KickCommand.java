@@ -35,7 +35,7 @@ public class KickCommand implements CommandExecutor {
 
         Optional<Group> groupOptional = CrowdBinding.getGroupManager().getPlayerGroup(source);
         if (!groupOptional.isPresent()) {
-            source.sendMessage(Text.of("You are not part of a group."));
+            source.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You are not part of a group."));
             return CommandResult.empty();
         }
 
