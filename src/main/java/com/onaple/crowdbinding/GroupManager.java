@@ -3,12 +3,11 @@ package com.onaple.crowdbinding;
 import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.data.Invitation;
 import com.onaple.crowdbinding.exceptions.*;
-import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;
@@ -108,6 +107,10 @@ public class GroupManager {
         if (System.currentTimeMillis() - invitation.get().getInviteDate().getTime() > 2*60*1000) {
             throw new ExpiredInvitationException("The invitation is no longer valid.");
         }
+        // Leave group if already in group
+        if (getPlayerGroup(invited).isPresent()) {
+            leaveGroup(invited);
+        }
         if (invitation.get().getGroupId() != null) {
             // Try to join existing group
             Optional<Group> groupOptional = groups.stream().filter(g -> g.getUuid() == invitation.get().getGroupId()).findAny();
@@ -164,13 +167,19 @@ public class GroupManager {
         }
         Group group = groupOptional.get();
         group.removePlayer(player);
+        for (Player groupPlayer : group.getPlayers()) {
+            if (!groupPlayer.equals(player)) {
+                groupPlayer.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, player.getName() + " left your group."));
+            }
+        }
         if (group.getPlayers().size() <= 1) {
+            group.getPlayers().stream().findAny().ifPresent(groupPlayer -> groupPlayer.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "Your group no longer exists.")));
             groups.remove(groups.indexOf(groupOptional.get()));
         } else {
             group.setFirstLeader();
             groups.set(groups.indexOf(groupOptional.get()), group);
         }
-        player.sendMessage(Text.of("You left your group."));
+        player.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "You left your group."));
         return true;
     }
 
