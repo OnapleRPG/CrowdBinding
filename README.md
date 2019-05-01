@@ -18,5 +18,8 @@ Permission : *crowdbinding.commands.list*
 * */group leave* : Leave your current group.  
 Permission : *crowdbinding.commands.leave*  
 
+* */group promote [player]* : Promote a player of your group to group leader.  
+Permission : *crowdbinding.commands.promote*  
+
 * */gr [message]* : Send a message to your group.  
 Permission : *crowdbinding.commands.chat*
