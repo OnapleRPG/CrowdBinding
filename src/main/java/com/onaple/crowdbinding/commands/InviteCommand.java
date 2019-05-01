@@ -26,7 +26,7 @@ public class InviteCommand implements CommandExecutor {
         }
 
         Player sender = (Player) src;
-        Optional<Player> recipient = args.<Player>getOne("recipient");
+        Optional<Player> recipient = args.<Player>getOne("player");
         if (!recipient.isPresent()) {
             sender.sendMessage(Text.of(TextColors.DARK_AQUA, TextStyles.ITALIC, "Player not found."));
             return CommandResult.empty();

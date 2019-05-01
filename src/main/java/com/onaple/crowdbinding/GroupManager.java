@@ -3,7 +3,6 @@ package com.onaple.crowdbinding;
 import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.data.Invitation;
 import com.onaple.crowdbinding.exceptions.*;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 
 import javax.inject.Singleton;
@@ -109,22 +108,6 @@ public class GroupManager {
         return invitation.get().getInviter();
     }
 
-    public Collection<Player> leaveGroup(Player player) throws PlayerNotInGroupException {
-        Optional<Group> groupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.getUniqueId().equals(player.getUniqueId()))).findAny();
-        if (!groupOptional.isPresent()) {
-            throw new PlayerNotInGroupException("You currently do not belong to a group.");
-        }
-        Group group = groupOptional.get();
-        group.removePlayer(player);
-        if (group.getPlayers().size() <= 1) {
-            groups.remove(groups.indexOf(groupOptional.get()));
-        } else {
-            group.setFirstLeader();
-            groups.set(groups.indexOf(groupOptional.get()), group);
-        }
-        return group.getPlayers();
-    }
-
     public Optional<Group> getPlayerGroup(Player player) {
         return groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.getUniqueId().equals(player.getUniqueId()))).findAny();
     }
@@ -141,7 +124,25 @@ public class GroupManager {
         group.setLeader(playerToPromote);
     }
 
+    public void kickPlayerFromGroup(Group group, Player player) {
+        Group groupCopy = new Group(group);
+        groupCopy.removePlayer(player);
+        groups.set(groups.indexOf(group), groupCopy);
+    }
+
     public Optional<Group> getGroup(UUID groupId) {
         return groups.stream().filter(group -> group.getUuid().equals(groupId)).findAny();
+    }
+
+    public boolean groupInUsed(Group group) {
+        return group.getPlayers().size() > 1;
+    }
+
+    public void removeGroup(Group group) {
+        groups.remove(groups.indexOf(group));
+    }
+
+    public void updateGroup(Group oldGroup, Group newGroup) {
+        groups.set(groups.indexOf(oldGroup), newGroup);
     }
 }

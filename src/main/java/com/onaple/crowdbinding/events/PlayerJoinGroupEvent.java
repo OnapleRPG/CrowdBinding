@@ -1,4 +1,4 @@
-package com.onaple.crowdbinding.event;
+package com.onaple.crowdbinding.events;
 
 import com.onaple.crowdbinding.data.Group;
 import org.spongepowered.api.entity.living.player.Player;

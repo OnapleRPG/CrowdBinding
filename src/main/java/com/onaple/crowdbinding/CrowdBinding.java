@@ -1,7 +1,10 @@
 package com.onaple.crowdbinding;
 
 import com.onaple.crowdbinding.commands.*;
+import com.onaple.crowdbinding.data.Group;
+import com.onaple.crowdbinding.events.PlayerLeaveGroupEvent;
 import com.onaple.crowdbinding.exceptions.PlayerNotInGroupException;
+import com.onaple.crowdbinding.listeners.PlayerLeaveGroupEventListener;
 import com.onaple.crowdbinding.service.GroupService;
 import com.onaple.crowdbinding.service.SimpleGroupService;
 import org.slf4j.Logger;
@@ -10,7 +13,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -19,6 +25,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 /**
  * CrowdBinding main class, a plugin that allows players to create and manage groups of players.
@@ -61,6 +68,15 @@ public class CrowdBinding {
         return commandManager;
     }
 
+    @Inject
+    private void setEventManager(EventManager eventManager) {
+        CrowdBinding.eventManager = eventManager;
+    }
+    private static EventManager eventManager;
+    public static EventManager getEventManager() {
+        return eventManager;
+    }
+
     public static PluginContainer getInstance() {
         return Sponge.getPluginManager().getPlugin("crowdbinding").orElse(null);
     }
@@ -78,7 +94,7 @@ public class CrowdBinding {
         CommandSpec inviteSpec = CommandSpec.builder()
                 .description(Text.of("Invites a player to your group"))
                 .permission("crowdbinding.commands.invite")
-                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("recipient"))))
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
                 .executor(new InviteCommand())
                 .build();
 
@@ -115,6 +131,13 @@ public class CrowdBinding {
                 .executor(new PromoteCommand())
                 .build();
 
+        CommandSpec kickSpec = CommandSpec.builder()
+                .description(Text.of("Kick a player from the group"))
+                .permission("crowdbinding.commands.kick")
+                .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+                .executor(new KickCommand())
+                .build();
+
         CommandSpec groupSpec = CommandSpec.builder()
                 .description(Text.of("Group view and management"))
                 .permission("crowdbinding.commands.*")
@@ -124,10 +147,13 @@ public class CrowdBinding {
                 .child(listSpec, "list")
                 .child(leaveSpec, "leave")
                 .child(promoteSpec, "promote")
+                .child(kickSpec, "kick")
                 .build();
 
         commandManager.register(this, chatSpec, "gr");
         commandManager.register(this, groupSpec, "group");
+
+        eventManager.registerListeners(this, new PlayerLeaveGroupEventListener());
 
         logger.info("CROWDBINDING initialized.");
     }
@@ -139,11 +165,11 @@ public class CrowdBinding {
 
     @Listener
     public void onClientDisconnect(ClientConnectionEvent.Disconnect clientDisconnectEvent) {
-        try {
-            groupManager.leaveGroup(clientDisconnectEvent.getTargetEntity());
-        } catch (PlayerNotInGroupException e) {
-            logger.debug(clientDisconnectEvent.getTargetEntity().getName() + " left without a group.");
-        }
+        groupManager.getPlayerGroup(clientDisconnectEvent.getTargetEntity()).ifPresent(g -> {
+            EventContext context = EventContext.builder().build();
+            Cause cause = Cause.builder().append(clientDisconnectEvent).build(context);
+            CrowdBinding.getEventManager().post(new PlayerLeaveGroupEvent(cause, clientDisconnectEvent.getTargetEntity(), g));
+        });
     }
 
 }

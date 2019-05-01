@@ -22,6 +22,12 @@ public class Group {
         messageChannel = new GroupMessageChannel();
         messageChannel.addMember(player);
     }
+    public Group(Group group) {
+        leader = group.getLeader();
+        players = group.getPlayers();
+        messageChannel = group.getMessageChannel();
+        uuid = group.getUuid();
+    }
 
     public Player getLeader() {
         return leader;
