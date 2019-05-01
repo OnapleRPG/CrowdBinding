@@ -31,7 +31,7 @@ public class PromoteCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        Optional<String> playerToPromote = args.getOne("player");
+        Optional<Player> playerToPromote = args.getOne("player");
         if (!playerToPromote.isPresent()) {
             src.sendMessage(Text.of("You must specify a player to promote."));
             return CommandResult.empty();
