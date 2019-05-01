@@ -9,22 +9,28 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import javax.inject.Singleton;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Singleton
 public class GroupManager {
+    public GroupManager() {}
+
     private final List<Group> groups = new ArrayList<>();
     private final List<Invitation> invitations = new ArrayList<>();
 
-    public void createInvitation(Player inviter, Player invited) {
+    public void createInvitation(Player inviter, Player invited) throws PlayerAlreadyInAGroupException {
         // Look for inviter's group
         UUID groupId = null;
-        outerloop:
         for(Group g : groups) {
             for(UUID p : g.getPlayers()) {
                 if (p.equals(inviter.getUniqueId())) {
                     groupId = g.getUuid();
-                    break outerloop;
+                }
+                if (p.equals(invited.getUniqueId())) {
+                    throw new PlayerAlreadyInAGroupException("The player you tried to invite is already in a group.");
                 }
             }
         }
@@ -60,11 +66,11 @@ public class GroupManager {
         );
     }
 
-    public void denyInvitation(Player invited, UUID invitationId) throws UnknownGroupException {
+    public void denyInvitation(Player invited, UUID invitationId) throws UnknownInvitationException {
         // Find matching invitation
         Optional<Invitation> invitation = invitations.stream().filter(i -> i.getGroupId() == invitationId).findAny();
         if (!invitation.isPresent()) {
-            throw new UnknownGroupException("Cannot deny non existing invitation.");
+            throw new UnknownInvitationException("The invitation no longer exists.");
         }
         // Send messages
         invitation.get().getInviter().sendMessage(

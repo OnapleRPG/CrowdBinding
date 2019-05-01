@@ -1,6 +1,6 @@
 package com.onaple.crowdbinding.commands;
 
-import com.onaple.crowdbinding.GroupManager;
+import com.onaple.crowdbinding.CrowdBinding;
 import com.onaple.crowdbinding.exceptions.SenderJoinedAnotherGroupException;
 import com.onaple.crowdbinding.exceptions.SenderLeftGroupException;
 import com.onaple.crowdbinding.exceptions.UnknownGroupException;
@@ -13,13 +13,9 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-import javax.inject.Inject;
 import java.util.UUID;
 
 public class AcceptCommand implements CommandExecutor {
-    @Inject
-    private GroupManager groupManager;
-
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         if (!(src instanceof Player)) {
@@ -34,9 +30,16 @@ public class AcceptCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        UUID inviteUuid = UUID.fromString(invitation);
+        UUID inviteUuid;
         try {
-            this.groupManager.acceptInvitation(source, inviteUuid);
+            inviteUuid = UUID.fromString(invitation);
+        } catch (IllegalArgumentException e) {
+            src.sendMessage(Text.of("Unrecognized invitation code."));
+            return CommandResult.empty();
+        }
+
+        try {
+            CrowdBinding.getGroupManager().acceptInvitation(source, inviteUuid);
             return CommandResult.success();
         } catch (UnknownGroupException | UnknownInvitationException | SenderLeftGroupException | SenderJoinedAnotherGroupException e) {
             src.sendMessage(Text.of(e.toString()));

@@ -1,6 +1,7 @@
 package com.onaple.crowdbinding.commands;
 
-import com.onaple.crowdbinding.GroupManager;
+import com.onaple.crowdbinding.CrowdBinding;
+import com.onaple.crowdbinding.exceptions.PlayerAlreadyInAGroupException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -9,13 +10,9 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-import javax.inject.Inject;
 import java.util.Optional;
 
 public class InviteCommand implements CommandExecutor {
-    @Inject
-    private GroupManager groupManager;
-
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 
@@ -36,7 +33,12 @@ public class InviteCommand implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        this.groupManager.createInvitation(sender, recipient.get());
+        try {
+            CrowdBinding.getGroupManager().createInvitation(sender, recipient.get());
+        } catch (PlayerAlreadyInAGroupException e) {
+            sender.sendMessage(Text.of(e.toString()));
+            return CommandResult.empty();
+        }
 
         return CommandResult.success();
     }

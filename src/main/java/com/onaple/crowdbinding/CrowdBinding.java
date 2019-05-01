@@ -1,15 +1,11 @@
 package com.onaple.crowdbinding;
 
 import com.onaple.crowdbinding.commands.*;
-import com.onaple.crowdbinding.data.Group;
+import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -17,22 +13,32 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.1.3")
-@Singleton
 /**
  * CrowdBinding main class, a plugin that allows players to create and manage groups of players.
  */
+@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.1.3")
 public class CrowdBinding {
     @Inject
-    private Game game;
+    private Logger logger;
 
     @Inject
-    private GroupManager groupManager;
+    private void setGroupManager(GroupManager groupManager) {
+        CrowdBinding.groupManager = groupManager;
+    }
+    private static GroupManager groupManager;
+    public static GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    @Inject
+    private void setGame(Game game) {
+        CrowdBinding.game = game;
+    }
+    private static Game game;
+    public static Game getGame() {
+        return game;
+    }
 
     @Inject
     private CommandManager commandManager;
@@ -84,10 +90,12 @@ public class CrowdBinding {
                 .build();
 
         commandManager.register(this, groupSpec, "group");
+
+        logger.info("CROWDBINDING initialized.");
     }
 
     @Listener
     public void onClientDisconnect(ClientConnectionEvent.Disconnect clientDisconnectEvent) {
-
+        groupManager.leaveGroup(clientDisconnectEvent.getTargetEntity());
     }
 }
