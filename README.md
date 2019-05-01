@@ -23,3 +23,44 @@ Permission : *crowdbinding.commands.promote*
 
 * */gr [message]* : Send a message to your group.  
 Permission : *crowdbinding.commands.chat*
+
+## For developer
+
+If you are willing to use **CrowdBinding** in your plugin development, we provide services to ease interactions.  
+
+### Services
+
+* **GroupService** : Give access to groups
+    * `Optional<Player> getGroupLeader(UUID groupId)` : Try to get group leader from an UUID.  
+    * `Optional<UUID> getGroupId(Player player)` : Try to get UUID of group player is in.  
+    * `List<Player> getMembers(UUID groupId)` : List members of group with given UUID.  
+
+### Installation with Gradle
+
+* Add [Jitpack](https://jitpack.io/) into your repositories
+ ```
+   repositories {
+     mavenCentral()
+     maven {
+         name = 'jitpack'
+         url = 'https://jitpack.io'
+     }
+ }  
+ ```
+ * Add **CrowdBinding** to your dependencies
+ ```
+ dependencies {
+      compile 'org.spongepowered:spongeapi:7.0.0'
+      implementation 'com.github.OnapleRPG:CrowdBinding:V0.4.0'
+  }
+ ```
+ * Use services 
+ ```java
+Optional<GroupService> optionalGroupService = Sponge.getServiceManager().provide(GroupService.class);
+            if (optionalGroupService.isPresent()) {
+                GroupService groupService = optionalGroupService.get();
+                players = groupService.getMembers(groupUuid);
+            }
+```
+ 
+
