@@ -52,7 +52,8 @@ public class PromoteCommand implements CommandExecutor {
         }
 
         groupOptional.get().getPlayers().forEach(p -> p.sendMessage(
-                Text.of(TextStyles.BOLD, playerToPromote, TextStyles.NONE, " is the new group leader.")
+                Text.of(Text.builder().append(Text.of(TextStyles.BOLD, playerToPromote.get().getName())).build(), TextStyles.RESET,
+                        TextColors.DARK_AQUA, " is the new group leader.")
                         .toBuilder().color(TextColors.DARK_AQUA).style(TextStyles.ITALIC).build())
         );
 

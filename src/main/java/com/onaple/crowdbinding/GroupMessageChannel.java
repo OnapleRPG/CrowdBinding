@@ -57,7 +57,9 @@ public class GroupMessageChannel implements MutableMessageChannel {
         if(this.members.contains(recipient)) {
             text = Text.of(TextColors.DARK_AQUA).toBuilder()
                     .append(Text.of("[gr]").toBuilder().onClick(TextActions.suggestCommand("/gr ")).build())
-                    .append(Text.of("<", isLeader ? TextStyles.BOLD : "", playerName, isLeader ? TextStyles.NONE : "" "> ", text))
+                    .append(Text.of("<"))
+                    .append(Text.builder().append(Text.of(isLeader ? TextStyles.BOLD : TextStyles.NONE, playerName)).build())
+                    .append(Text.of("> ", text))
                     .build();
         }
         return Optional.of(text);

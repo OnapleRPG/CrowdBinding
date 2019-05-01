@@ -42,7 +42,7 @@ public class ListCommand implements CommandExecutor {
             }
             placeComma = true;
             if (group.getLeader().getName().equals(p.getName())) {
-                builder.append(Text.of(TextStyles.BOLD, p.getName(), TextStyles.NONE));
+                builder.append(Text.builder().append(Text.of(TextStyles.BOLD, p.getName())).build());
             } else {
                 builder.append(Text.of(p.getName()));
             }
