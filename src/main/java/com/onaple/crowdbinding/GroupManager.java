@@ -3,20 +3,29 @@ package com.onaple.crowdbinding;
 import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.data.Invitation;
 import com.onaple.crowdbinding.exceptions.*;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Singleton
 public class GroupManager {
-    public GroupManager() {}
+
+    private Server server;
+
+    public GroupManager() {
+        server = Sponge.getServer();
+    }
 
     private final List<Group> groups = new ArrayList<>();
     private final List<Invitation> invitations = new ArrayList<>();
@@ -186,4 +195,10 @@ public class GroupManager {
 
         group.setLeader(playerToPromote);
     }
+
+    public Optional<Group> getGroup(UUID groupId) {
+        return groups.stream().filter(group -> group.getUuid().equals(groupId)).findAny();
+    }
+
+
 }

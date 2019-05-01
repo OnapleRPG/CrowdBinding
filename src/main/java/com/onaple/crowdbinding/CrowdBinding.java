@@ -1,15 +1,20 @@
 package com.onaple.crowdbinding;
 
 import com.onaple.crowdbinding.commands.*;
+import com.onaple.crowdbinding.service.GroupService;
+import com.onaple.crowdbinding.service.SimpleGroupService;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 import javax.inject.Inject;
@@ -48,6 +53,10 @@ public class CrowdBinding {
 
     @Inject
     private CommandManager commandManager;
+
+    public static PluginContainer getInstance() {
+        return Sponge.getPluginManager().getPlugin("crowdbinding").orElse(null);
+    }
 
     @Listener
     public void onServerStart(GameInitializationEvent gameInitializationEvent) {
@@ -117,7 +126,13 @@ public class CrowdBinding {
     }
 
     @Listener
+    public void gameConstruct(GameConstructionEvent event) {
+        Sponge.getServiceManager().setProvider(getInstance(), GroupService.class, new SimpleGroupService());
+    }
+
+    @Listener
     public void onClientDisconnect(ClientConnectionEvent.Disconnect clientDisconnectEvent) {
         groupManager.leaveGroup(clientDisconnectEvent.getTargetEntity());
     }
+
 }
