@@ -53,7 +53,13 @@ public class CrowdBinding {
     }
 
     @Inject
-    private CommandManager commandManager;
+    private void setCommandManager(CommandManager commandManager) {
+        CrowdBinding.commandManager = commandManager;
+    }
+    private static CommandManager commandManager;
+    public static CommandManager getCommandManager() {
+        return commandManager;
+    }
 
     public static PluginContainer getInstance() {
         return Sponge.getPluginManager().getPlugin("crowdbinding").orElse(null);

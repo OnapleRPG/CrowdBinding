@@ -3,6 +3,7 @@ package com.onaple.crowdbinding;
 import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.data.Invitation;
 import com.onaple.crowdbinding.exceptions.*;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 
 import javax.inject.Singleton;
@@ -67,11 +68,8 @@ public class GroupManager {
         }
         // Leave group if already in group
         if (getPlayerGroup(invited).isPresent()) {
-            try {
-                leaveGroup(invited);
-            } catch (PlayerNotInGroupException e) {
-                CrowdBinding.getLogger().warn("A group was found but could not be left.");
-            }
+            // Calling the command "group leave" to avoid putting message code within GroupManager
+            CrowdBinding.getCommandManager().process(invited, "group leave");
         }
         if (invitation.get().getGroupId() != null) {
             // Try to join existing group
