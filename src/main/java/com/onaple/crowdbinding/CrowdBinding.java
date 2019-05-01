@@ -20,7 +20,13 @@ import javax.inject.Inject;
 @Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.2.0")
 public class CrowdBinding {
     @Inject
-    private Logger logger;
+    private void setLogger(Logger logger) {
+        CrowdBinding.logger = logger;
+    }
+    private static Logger logger;
+    public static Logger getLogger() {
+        return logger;
+    }
 
     @Inject
     private void setGroupManager(GroupManager groupManager) {

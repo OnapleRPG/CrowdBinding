@@ -68,13 +68,13 @@ public class GroupManager {
 
     public void denyInvitation(Player invited, UUID invitationId) throws UnknownInvitationException {
         // Find matching invitation
-        Optional<Invitation> invitation = invitations.stream().filter(i -> i.getGroupId() == invitationId).findAny();
+        Optional<Invitation> invitation = invitations.stream().filter(i -> i.getUuid().equals(invitationId)).findAny();
         if (!invitation.isPresent()) {
             throw new UnknownInvitationException("The invitation no longer exists.");
         }
         // Send messages
         invitation.get().getInviter().sendMessage(
-                Text.builder(invited.getDisplayNameData().displayName().toString())
+                Text.builder(invited.getDisplayNameData().displayName().get().toString())
                         .append(Text.of(" denied your invitation."))
                         .build()
         );
@@ -91,7 +91,7 @@ public class GroupManager {
     public void acceptInvitation(Player invited, UUID invitationId) throws UnknownGroupException,
             UnknownInvitationException, SenderLeftGroupException, SenderJoinedAnotherGroupException {
         // Find matching invitation
-        Optional<Invitation> invitation = invitations.stream().filter(i -> i.getGroupId() == invitationId).findAny();
+        Optional<Invitation> invitation = invitations.stream().filter(i -> i.getUuid().equals(invitationId)).findAny();
         if (!invitation.isPresent()) {
             throw new UnknownInvitationException("Cannot accept non existing invitation.");
         }
@@ -129,7 +129,7 @@ public class GroupManager {
         }
         // Send messages
         invitation.get().getInviter().sendMessage(
-                Text.builder(invited.getDisplayNameData().displayName().toString())
+                Text.builder(invited.getDisplayNameData().displayName().get().toString())
                         .append(Text.of(" accepted your invitation."))
                         .build()
         );
@@ -151,7 +151,11 @@ public class GroupManager {
         }
         Group group = groupOptional.get();
         group.removePlayer(player.getUniqueId());
-        groups.set(groups.indexOf(groupOptional.get()), group);
+        if (group.getPlayers().size() <= 1) {
+            groups.remove(groups.indexOf(groupOptional.get()));
+        } else {
+            groups.set(groups.indexOf(groupOptional.get()), group);
+        }
         player.sendMessage(Text.of("You left your group."));
         return true;
     }

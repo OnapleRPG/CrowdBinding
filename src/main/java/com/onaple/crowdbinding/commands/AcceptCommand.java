@@ -42,7 +42,7 @@ public class AcceptCommand implements CommandExecutor {
             CrowdBinding.getGroupManager().acceptInvitation(source, inviteUuid);
             return CommandResult.success();
         } catch (UnknownGroupException | UnknownInvitationException | SenderLeftGroupException | SenderJoinedAnotherGroupException e) {
-            src.sendMessage(Text.of(e.toString()));
+            src.sendMessage(Text.of(e.getMessage()));
             return CommandResult.empty();
         }
     }

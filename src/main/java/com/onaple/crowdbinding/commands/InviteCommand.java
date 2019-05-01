@@ -36,7 +36,7 @@ public class InviteCommand implements CommandExecutor {
         try {
             CrowdBinding.getGroupManager().createInvitation(sender, recipient.get());
         } catch (PlayerAlreadyInAGroupException e) {
-            sender.sendMessage(Text.of(e.toString()));
+            sender.sendMessage(Text.of(e.getMessage()));
             return CommandResult.empty();
         }
 

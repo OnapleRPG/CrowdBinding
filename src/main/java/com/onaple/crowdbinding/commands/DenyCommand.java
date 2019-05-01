@@ -39,7 +39,7 @@ public class DenyCommand implements CommandExecutor {
             CrowdBinding.getGroupManager().denyInvitation(source, inviteUuid);
             return CommandResult.success();
         } catch (UnknownInvitationException e) {
-            src.sendMessage(Text.of(e.toString()));
+            src.sendMessage(Text.of(e.getMessage()));
             return CommandResult.empty();
         }
     }
