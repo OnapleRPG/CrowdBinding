@@ -4,16 +4,19 @@ CrowdBinding is a Sponge Minecraft plugin that allows group management between p
 ## Minecraft commands
 
 * */group invite [player]* : Invite a player into your group, create one if needed. The player will receive an invitation within the chat.    
-Permission : crowdbinding.commands.invite  
+Permission : *crowdbinding.commands.invite*  
 
 * */group accept [UUID]* : Accept a pending invitation. This command is issued when clicking an invitation, you're not really supposed to type it yourself.  
-Permission : crowdbinding.commands.accept  
+Permission : *crowdbinding.commands.accept*  
 
 * */group deny [UUID]* : Deny a pending invitation. This command is issued when clicking an invitation, you're not really supposed to type it yourself.  
-Permission : crowdbinding.commands.deny  
+Permission : *crowdbinding.commands.deny*  
 
 * */group list* : List the members of your group.  
-Permission : crowdbinding.commands.list  
+Permission : *crowdbinding.commands.list*  
 
 * */group leave* : Leave your current group.  
-Permission : crowdbinding.commands.leave    
+Permission : *crowdbinding.commands.leave*  
+
+* */gr [message]* : Send a message to your group.  
+Permission : *crowdbinding.commands.chat*

@@ -52,6 +52,13 @@ public class CrowdBinding {
     @Listener
     public void onServerStart(GameInitializationEvent gameInitializationEvent) {
 
+        CommandSpec chatSpec = CommandSpec.builder()
+                .description(Text.of("Send a message to your group"))
+                .permission("crowdbinding.commands.chat")
+                .arguments(GenericArguments.remainingJoinedStrings(Text.of("message")))
+                .executor(new ChatCommand())
+                .build();
+
         CommandSpec inviteSpec = CommandSpec.builder()
                 .description(Text.of("Invites a player to your group"))
                 .permission("crowdbinding.commands.invite")
@@ -95,6 +102,7 @@ public class CrowdBinding {
                 .child(leaveSpec, "leave")
                 .build();
 
+        commandManager.register(this, chatSpec, "gr");
         commandManager.register(this, groupSpec, "group");
 
         logger.info("CROWDBINDING initialized.");

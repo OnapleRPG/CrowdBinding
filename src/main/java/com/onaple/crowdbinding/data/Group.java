@@ -1,5 +1,6 @@
 package com.onaple.crowdbinding.data;
 
+import com.onaple.crowdbinding.GroupMessageChannel;
 import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.Collection;
@@ -13,22 +14,12 @@ public class Group {
     private UUID leader;
     private Collection<UUID> players = new HashSet<>();
     private UUID uuid = UUID.randomUUID();
-
-    public Group(Player...players) {
-        for (Player player : players) {
-            this.players.add(player.getUniqueId());
-        }
-    }
-
-    public Group(UUID...players) {
-        for (UUID player : players) {
-            this.players.add(player);
-        }
-    }
+    private GroupMessageChannel messageChannel;
 
     public Group(UUID player) {
         leader = player;
         this.players.add(player);
+        messageChannel = new GroupMessageChannel();
     }
 
     public UUID getLeader() {
@@ -40,11 +31,16 @@ public class Group {
     public UUID getUuid() {
         return uuid;
     }
-
-    public void addPlayer(UUID player) {
-        players.add(player);
+    public GroupMessageChannel getMessageChannel() {
+        return messageChannel;
     }
-    public void removePlayer(UUID player) {
-        players.remove(player);
+
+    public void addPlayer(Player player) {
+        players.add(player.getUniqueId());
+        messageChannel.addMember(player);
+    }
+    public void removePlayer(Player player) {
+        players.remove(player.getUniqueId());
+        messageChannel.removeMember(player);
     }
 }

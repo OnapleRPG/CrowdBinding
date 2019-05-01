@@ -107,19 +107,19 @@ public class GroupManager {
                 throw new SenderLeftGroupException("Sender left the group you were invited to.");
             }
             Group group = groupOptional.get();
-            group.addPlayer(invited.getUniqueId());
+            group.addPlayer(invited);
             groups.set(groups.indexOf(groupOptional.get()), group);
         } else {
             // Try to join new group
             Optional<Group> existingGroupOptional = groups.stream().filter(g -> g.getPlayers().stream().anyMatch(p -> p.equals(invitation.get().getInviter().getUniqueId()))).findAny();
             if (!existingGroupOptional.isPresent()) {
                 Group newGroup = new Group(invitation.get().getInviter().getUniqueId());
-                newGroup.addPlayer(invited.getUniqueId());
+                newGroup.addPlayer(invited);
                 groups.add(newGroup);
             } else {
                 Group existingGroup = existingGroupOptional.get();
                 if (existingGroup.getLeader().equals(invitation.get().getInviter().getUniqueId())) {
-                    existingGroup.addPlayer(invited.getUniqueId());
+                    existingGroup.addPlayer(invited);
                     groups.set(groups.indexOf(existingGroupOptional.get()), existingGroup);
                 } else {
                     invitations.remove(invitation.get());
@@ -150,7 +150,7 @@ public class GroupManager {
             return false;
         }
         Group group = groupOptional.get();
-        group.removePlayer(player.getUniqueId());
+        group.removePlayer(player);
         if (group.getPlayers().size() <= 1) {
             groups.remove(groups.indexOf(groupOptional.get()));
         } else {
