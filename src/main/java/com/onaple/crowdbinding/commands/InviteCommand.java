@@ -48,7 +48,7 @@ public class InviteCommand implements CommandExecutor {
         return CommandResult.success();
     }
 
-    private void sendInvitationIntoChat(Player invited, Player inviter, UUID groupId) {
+    private void sendInvitationIntoChat(Player inviter, Player invited, UUID groupId) {
         Text acceptClickableText = Text.builder("[Accept]")
                 .color(TextColors.GREEN)
                 .onClick(TextActions.runCommand("/group accept " + groupId.toString()))
