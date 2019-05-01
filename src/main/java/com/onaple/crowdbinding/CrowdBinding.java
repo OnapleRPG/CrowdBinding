@@ -17,7 +17,7 @@ import javax.inject.Inject;
 /**
  * CrowdBinding main class, a plugin that allows players to create and manage groups of players.
  */
-@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.1.3")
+@Plugin(id = "crowdbinding", name = "CrowdBinding", version = "0.2.0")
 public class CrowdBinding {
     @Inject
     private Logger logger;
