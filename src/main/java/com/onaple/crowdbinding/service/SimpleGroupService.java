@@ -32,4 +32,15 @@ public class SimpleGroupService implements GroupService {
         Optional<Group> groupOptional = CrowdBinding.getGroupManager().getGroup(groupId);
         return groupOptional.map(group -> new ArrayList<>(group.getPlayers())).orElseGet(ArrayList::new);
     }
+
+    @Override
+    public void addPlayer(Player newMember, UUID groupId) {
+        CrowdBinding.getGroupManager().getGroup(groupId).ifPresent(group -> group.addPlayer(newMember));
+    }
+
+    @Override
+    public void kickPlayer(Player player) {
+        Optional<Group> groupOptional = CrowdBinding.getGroupManager().getPlayerGroup(player);
+        groupOptional.ifPresent(grp -> CrowdBinding.getGroupManager().kickPlayerFromGroup(grp, player));
+    }
 }
