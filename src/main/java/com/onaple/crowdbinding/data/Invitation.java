@@ -3,7 +3,6 @@ package com.onaple.crowdbinding.data;
 import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 /**

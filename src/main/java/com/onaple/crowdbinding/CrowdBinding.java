@@ -1,9 +1,7 @@
 package com.onaple.crowdbinding;
 
 import com.onaple.crowdbinding.commands.*;
-import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.events.PlayerLeaveGroupEvent;
-import com.onaple.crowdbinding.exceptions.PlayerNotInGroupException;
 import com.onaple.crowdbinding.listeners.PlayerLeaveGroupEventListener;
 import com.onaple.crowdbinding.service.GroupService;
 import com.onaple.crowdbinding.service.SimpleGroupService;
@@ -25,7 +23,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 import javax.inject.Inject;
-import java.util.Optional;
 
 /**
  * CrowdBinding main class, a plugin that allows players to create and manage groups of players.

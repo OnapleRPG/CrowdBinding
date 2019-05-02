@@ -4,7 +4,6 @@ import com.onaple.crowdbinding.CrowdBinding;
 import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.exceptions.InsufficientGroupPermissionException;
 import com.onaple.crowdbinding.exceptions.PlayerNotInGroupException;
-import com.onaple.crowdbinding.exceptions.UnknownInvitationException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -16,7 +15,6 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class PromoteCommand implements CommandExecutor {
     @Override

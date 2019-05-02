@@ -3,7 +3,6 @@ package com.onaple.crowdbinding.commands;
 import com.onaple.crowdbinding.CrowdBinding;
 import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.events.PlayerLeaveGroupEvent;
-import com.onaple.crowdbinding.exceptions.PlayerAlreadyInAGroupException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -13,12 +12,10 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class KickCommand implements CommandExecutor {
     @Override

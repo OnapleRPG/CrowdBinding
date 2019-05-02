@@ -32,9 +32,9 @@ public interface GroupService {
     /**
      * Add a player to a group
      * @param newMember The player you want to add to the group
-     * @param Group The Id of the group
+     * @param groupId The Id of the group
      */
-    void addPlayer(Player newMember,UUID Group);
+    void addPlayer(Player newMember,UUID groupId);
 
     /**
      * Kick a player from his current group

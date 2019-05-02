@@ -2,11 +2,8 @@ package com.onaple.crowdbinding;
 
 import com.onaple.crowdbinding.data.Group;
 import com.onaple.crowdbinding.data.Invitation;
-import com.onaple.crowdbinding.events.PlayerLeaveGroupEvent;
 import com.onaple.crowdbinding.exceptions.*;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 
 import javax.inject.Singleton;
 import java.util.*;
