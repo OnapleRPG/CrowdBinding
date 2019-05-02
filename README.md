@@ -51,7 +51,7 @@ If you are willing to use **CrowdBinding** in your plugin development, we provid
  ```
  dependencies {
       compile 'org.spongepowered:spongeapi:7.0.0'
-      implementation 'com.github.OnapleRPG:CrowdBinding:V0.4.1'
+      implementation 'com.github.OnapleRPG:CrowdBinding:v0.4.1'
   }
  ```
  * Use services 
