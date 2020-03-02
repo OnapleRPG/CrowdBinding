@@ -4,6 +4,7 @@ build
 gradle
 *.iml
 gradle.properties
+gradlew.bat
 
 
 # Created by https://www.gitignore.io/api/java,gradle,eclipse,intellij
