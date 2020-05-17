@@ -50,6 +50,9 @@ public class Group {
         players.remove(player);
         messageChannel.removeMember(player);
     }
+    public void clearPlayers() {
+        players.clear();
+    }
 
     public void setFirstLeader() {
         if (players.size() > 0) {

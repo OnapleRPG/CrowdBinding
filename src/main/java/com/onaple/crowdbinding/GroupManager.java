@@ -139,6 +139,7 @@ public class GroupManager {
     }
 
     public void removeGroup(Group group) {
+        group.clearPlayers();
         groups.remove(groups.indexOf(group));
     }
 
